@@ -62,7 +62,7 @@ public class MovieListFragment extends Fragment {
             }
         });
 
-        /*mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
             public void onScroll(AbsListView absListView,int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -75,7 +75,7 @@ public class MovieListFragment extends Fragment {
             public void onScrollStateChanged(AbsListView absListView, int i) {
 
             }
-        });*/
+        });
 
         return rootView;
     }
