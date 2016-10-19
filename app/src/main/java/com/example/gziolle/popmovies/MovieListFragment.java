@@ -38,6 +38,8 @@ import java.util.ArrayList;
 
 public class MovieListFragment extends Fragment {
 
+    public static final String LOG_TAG = MovieListFragment.class.getSimpleName();
+
     public static String TMDB_RESULTS = "results";
     public static String TMDB_ID = "id";
     public static String TMDB_TITLE = "title";
@@ -70,7 +72,6 @@ public class MovieListFragment extends Fragment {
                 MovieItem item = mMovieAdapter.getItem(position);
 
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra(TMDB_ID, item.get_id());
                 intent.putExtra(TMDB_TITLE, item.getTitle());
                 intent.putExtra(TMDB_POSTER_PATH, item.getPosterPath());
                 intent.putExtra(TMDB_RELEASE_DATE, item.getReleaseDate());
@@ -115,15 +116,12 @@ public class MovieListFragment extends Fragment {
 
             String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
             if (lastQueryMode.equals("")) {
-                Log.d("Ziolle", "lastQueryMode.equals(\"\")");
                 lastQueryMode = queryMode;
             } else if (!lastQueryMode.equals(queryMode)) {
-                Log.d("Ziolle", "!lastQueryMode.equals(queryMode)");
                 mMovieItems.clear();
                 currentPage = 1;
                 lastQueryMode = queryMode;
             } else {
-                Log.d("Ziolle", "lastQueryMode.equals(queryMode)");
                 currentPage++;
             }
 
@@ -172,8 +170,6 @@ public class MovieListFragment extends Fragment {
 
                 URL queryUrl = new URL(builder.build().toString());
 
-                Log.d("Ziolle", builder.build().toString());
-
                 conn = (HttpURLConnection) queryUrl.openConnection();
                 conn.setRequestMethod("GET");
                 conn.connect();
@@ -182,17 +178,10 @@ public class MovieListFragment extends Fragment {
 
                 //Error handling
                 if (is == null) {
-                    Log.d("Ziolle", "is == null");
                     return null;
                 }
 
                 reader = new BufferedReader(new InputStreamReader(is));
-
-                //Error handling
-                if (reader == null) {
-                    Log.d("Ziolle", "reader == null");
-                    return null;
-                }
 
                 String line;
                 StringBuffer buffer = new StringBuffer();
@@ -203,18 +192,15 @@ public class MovieListFragment extends Fragment {
 
                 //Error handling
                 if (buffer.length() == 0) {
-                    Log.d("Ziolle", "buffer.length() == 0");
                     return null;
                 }
 
                 moviesJSONString = buffer.toString();
 
-                Log.d("Ziolle", moviesJSONString);
-
                 movieItems = getDataFromJSON(moviesJSONString);
-                Log.d("Ziolle", movieItems.size() + "");
 
             } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
 
             } finally {
                 if (conn != null) {
@@ -225,7 +211,7 @@ public class MovieListFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (Exception e) {
-
+                        Log.e(LOG_TAG, e.getMessage());
                     }
                 }
             }
@@ -242,7 +228,7 @@ public class MovieListFragment extends Fragment {
             super.onPostExecute(result);
         }
 
-        public ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
+        ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
             ArrayList<MovieItem> movieItems = new ArrayList<>();
 
             JSONObject mainObject = new JSONObject(JSONString);
@@ -255,7 +241,6 @@ public class MovieListFragment extends Fragment {
                 MovieItem item = new MovieItem(movie.getLong(TMDB_ID), movie.getString(TMDB_TITLE),
                         movie.getString(TMDB_POSTER_PATH), movie.getString(TMDB_OVERVIEW),
                         movie.getDouble(TMDB_VOTE_AVERAGE), movie.getString(TMDB_RELEASE_DATE));
-                Log.e("Ziolle", item.getPosterPath());
                 movieItems.add(item);
             }
             return movieItems;
