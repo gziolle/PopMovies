@@ -1,11 +1,14 @@
 package com.example.gziolle.popmovies;
 
 import android.preference.PreferenceActivity;
-
-/**
- * Created by gziolle on 10/18/2016.
- */
+import android.os.Bundle;
 
 public class SettingsActivity extends PreferenceActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
+    }
 
 }

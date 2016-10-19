@@ -1,6 +1,7 @@
 package com.example.gziolle.popmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,10 +38,18 @@ import java.util.ArrayList;
 
 public class MovieListFragment extends Fragment {
 
+    public static String TMDB_RESULTS = "results";
+    public static String TMDB_ID = "id";
+    public static String TMDB_TITLE = "title";
+    public static String TMDB_POSTER_PATH = "poster_path";
+    public static String TMDB_OVERVIEW = "overview";
+    public static String TMDB_VOTE_AVERAGE = "vote_average";
+    public static String TMDB_RELEASE_DATE = "release_date";
     public GridView mGridView;
     public MovieAdapter mMovieAdapter;
     public ArrayList<MovieItem> mMovieItems;
     private int currentPage = 0;
+    private String lastQueryMode = "";
     private boolean mIsFetching = false;
 
     @Nullable
@@ -57,8 +66,17 @@ public class MovieListFragment extends Fragment {
 
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                MovieItem item = mMovieAdapter.getItem(position);
 
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(TMDB_ID, item.get_id());
+                intent.putExtra(TMDB_TITLE, item.getTitle());
+                intent.putExtra(TMDB_POSTER_PATH, item.getPosterPath());
+                intent.putExtra(TMDB_RELEASE_DATE, item.getReleaseDate());
+                intent.putExtra(TMDB_OVERVIEW, item.getOverview());
+                intent.putExtra(TMDB_VOTE_AVERAGE, item.getAverage());
+                startActivity(intent);
             }
         });
 
@@ -76,19 +94,14 @@ public class MovieListFragment extends Fragment {
 
             }
         });
-
         return rootView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        updateMovieList();
 
-        if (networkInfo.isAvailable() && networkInfo.isConnected()) {
-            updateMovieList();
-        }
     }
 
     public void updateMovieList() {
@@ -97,10 +110,22 @@ public class MovieListFragment extends Fragment {
 
         if (networkInfo.isAvailable() && networkInfo.isConnected()) {
             //Get the sharedPreference and start the AsyncTask
-            currentPage++;
+
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-            String queryMode = prefs.getString(getString(R.string.query_mode_label), getString(R.string.query_mode_default));
+            String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
+            if (lastQueryMode.equals("")) {
+                Log.d("Ziolle", "lastQueryMode.equals(\"\")");
+                lastQueryMode = queryMode;
+            } else if (!lastQueryMode.equals(queryMode)) {
+                Log.d("Ziolle", "!lastQueryMode.equals(queryMode)");
+                mMovieItems.clear();
+                currentPage = 1;
+                lastQueryMode = queryMode;
+            } else {
+                Log.d("Ziolle", "lastQueryMode.equals(queryMode)");
+                currentPage++;
+            }
 
             new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
 
@@ -210,23 +235,15 @@ public class MovieListFragment extends Fragment {
         @Override
         protected void onPostExecute(ArrayList<MovieItem> result) {
             mIsFetching = false;
-            mMovieItems.addAll(result);
-            mMovieAdapter.notifyDataSetChanged();
-
+            if (result != null) {
+                mMovieItems.addAll(result);
+                mMovieAdapter.notifyDataSetChanged();
+            }
             super.onPostExecute(result);
         }
 
         public ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
             ArrayList<MovieItem> movieItems = new ArrayList<>();
-
-            String TMDB_RESULTS = "results";
-            String TMDB_ID = "id";
-            String TMDB_TITLE = "title";
-            String TMDB_POSTER_PATH = "poster_path";
-            String TMDB_OVERVIEW = "overview";
-            String TMDB_VOTE_AVERAGE = "vote_average";
-            String TMDB_RELEASE_DATE = "vote_average";
-
 
             JSONObject mainObject = new JSONObject(JSONString);
 
@@ -238,7 +255,7 @@ public class MovieListFragment extends Fragment {
                 MovieItem item = new MovieItem(movie.getLong(TMDB_ID), movie.getString(TMDB_TITLE),
                         movie.getString(TMDB_POSTER_PATH), movie.getString(TMDB_OVERVIEW),
                         movie.getDouble(TMDB_VOTE_AVERAGE), movie.getString(TMDB_RELEASE_DATE));
-                Log.e("Ziolle", item.posterPath);
+                Log.e("Ziolle", item.getPosterPath());
                 movieItems.add(item);
             }
             return movieItems;

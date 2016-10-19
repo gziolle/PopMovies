@@ -9,12 +9,12 @@ public class MovieItem {
     private static final String AUTHORITY = "http://image.tmdb.org/t/p/w185";
 
 
-    public long _id;
-    public String title;
-    public String posterPath;
-    public String overview;
-    public double average;
-    public String releaseDate;
+    private long _id;
+    private String title;
+    private String posterPath;
+    private String overview;
+    private double average;
+    private String releaseDate;
 
 
     public MovieItem(long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate) {
@@ -26,5 +26,27 @@ public class MovieItem {
         this.releaseDate = releaseDate;
     }
 
+    public long get_id() {
+        return _id;
+    }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public double getAverage() {
+        return average;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
 }
