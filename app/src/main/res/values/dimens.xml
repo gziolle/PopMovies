@@ -3,4 +3,5 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="title_size">48sp</dimen>
+    <dimen name="trailer_list_item_padding">4dp</dimen>
 </resources>

@@ -47,6 +47,7 @@ public class MovieListFragment extends Fragment {
     public static String TMDB_OVERVIEW = "overview";
     public static String TMDB_VOTE_AVERAGE = "vote_average";
     public static String TMDB_RELEASE_DATE = "release_date";
+
     public GridView mGridView;
     public MovieAdapter mMovieAdapter;
     public ArrayList<MovieItem> mMovieItems;
@@ -72,6 +73,7 @@ public class MovieListFragment extends Fragment {
                 MovieItem item = mMovieAdapter.getItem(position);
 
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(TMDB_ID, item.get_id());
                 intent.putExtra(TMDB_TITLE, item.getTitle());
                 intent.putExtra(TMDB_POSTER_PATH, item.getPosterPath());
                 intent.putExtra(TMDB_RELEASE_DATE, item.getReleaseDate());

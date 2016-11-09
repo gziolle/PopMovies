@@ -21,6 +21,7 @@ public class DetailActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
 
         if (intent != null) {
+            bundle.putLong(MovieListFragment.TMDB_ID, intent.getLongExtra(MovieListFragment.TMDB_ID, 0));
             bundle.putString(MovieListFragment.TMDB_TITLE, intent.getStringExtra(MovieListFragment.TMDB_TITLE));
             bundle.putString(MovieListFragment.TMDB_POSTER_PATH, intent.getStringExtra(MovieListFragment.TMDB_POSTER_PATH));
             bundle.putString(MovieListFragment.TMDB_RELEASE_DATE, intent.getStringExtra(MovieListFragment.TMDB_RELEASE_DATE));

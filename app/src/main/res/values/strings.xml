@@ -4,6 +4,9 @@
     <string name="query_mode_label">Search Mode</string>
     <string name="query_mode_default">popular</string>
     <string name="query_mode_key" translatable="false">query_mode</string>
+    <string name="trailer">Trailer</string>
+    <string name="trailers">Trailers</string>
+    <string name="progress_message">Please wait...</string>
 
     <string-array name="query_mode_options">
         <item>Popular</item>
