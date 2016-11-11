@@ -2,6 +2,7 @@ package com.example.gziolle.popmovies;
 
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -16,8 +17,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.gziolle.popmovies.data.FavoritesContract;
 import com.squareup.picasso.Picasso;
 
 import java.io.BufferedReader;
@@ -47,6 +51,8 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private ImageButton mImageButton;
+    private Bundle mBundle;
 
     @Nullable
     @Override
@@ -62,6 +68,38 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         mAdapter = new TrailerAdapter(getActivity(), mMovieTrailers, this);
         mRecyclerView.setAdapter(mAdapter);
 
+        mImageButton = (ImageButton) rootView.findViewById(R.id.favorite_button);
+
+        //TODO
+        // make a query to check id the movie is already a favorite one.
+        // If so, set the imagebutton as selected.
+        mImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mImageButton.isSelected()) {
+                    mImageButton.setSelected(true);
+                    //add movie to the database
+                    ContentValues values = new ContentValues();
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, String.valueOf(mBundle.getLong(MovieListFragment.TMDB_ID)));
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_TITLE, mBundle.getString(MovieListFragment.TMDB_TITLE));
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, mBundle.getString(MovieListFragment.TMDB_POSTER_PATH));
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, mBundle.getString(MovieListFragment.TMDB_OVERVIEW));
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, String.valueOf(mBundle.getDouble(MovieListFragment.TMDB_VOTE_AVERAGE)));
+                    values.put(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, mBundle.getString(MovieListFragment.TMDB_RELEASE_DATE));
+
+                    Uri rowUri = getActivity().getContentResolver().insert(FavoritesContract.FavoritesEntry.CONTENT_URI, values);
+                } else {
+                    mImageButton.setSelected(false);
+                    //delete movie from the database
+
+                    String selection = FavoritesContract.FavoritesEntry.TABLE_NAME + "." + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(mBundle.getLong(MovieListFragment.TMDB_ID))};
+
+                    int rowsCount = getActivity().getContentResolver().delete(FavoritesContract.FavoritesEntry.CONTENT_URI, selection, selectionArgs);
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -70,7 +108,8 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         super.onActivityCreated(savedInstanceState);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            bindView(bundle);
+            mBundle = bundle;
+            bindView(mBundle);
         }
     }
 

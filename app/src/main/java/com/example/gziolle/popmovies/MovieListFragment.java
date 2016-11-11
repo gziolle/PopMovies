@@ -111,7 +111,7 @@ public class MovieListFragment extends Fragment {
         ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
 
-        if (networkInfo.isAvailable() && networkInfo.isConnected()) {
+        if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
             //Get the sharedPreference and start the AsyncTask
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());

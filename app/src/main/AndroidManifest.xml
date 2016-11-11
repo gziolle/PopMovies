@@ -30,6 +30,11 @@
             android:name=".SettingsActivity"
             android:label="@string/settings"
             android:theme="@style/SettingsTheme" />
+
+        <provider
+            android:name=".data.FavoritesProvider"
+            android:authorities="com.example.gziolle.popmovies.provider"
+            android:exported="false" />
     </application>
 
 </manifest>
