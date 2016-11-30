@@ -5,6 +5,8 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -140,6 +142,23 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
         TextView overview = (TextView) getActivity().findViewById(R.id.overview);
         overview.setText(bundle.getString(MovieListFragment.TMDB_OVERVIEW));
+
+        ImageButton favoriteButton = (ImageButton) getActivity().findViewById(R.id.favorite_button);
+
+        String[] projection = {FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID};
+        String[] selectionArgs = {String.valueOf(bundle.getLong(MovieListFragment.TMDB_ID))};
+
+        String selection = FavoritesContract.FavoritesEntry.TABLE_NAME + "." + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ?";
+
+        Cursor retCursor = getActivity().getContentResolver().query(FavoritesContract.FavoritesEntry.CONTENT_URI, projection, selection, selectionArgs, null);
+
+        try {
+            if (retCursor.moveToFirst()) {
+                favoriteButton.setSelected(true);
+            }
+        } catch (NullPointerException ex) {
+            Log.e("Ziolle", ex.getMessage());
+        }
 
         try {
             updateTrailerList(bundle.getLong(MovieListFragment.TMDB_ID));

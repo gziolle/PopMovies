@@ -36,9 +36,5 @@ public class FavoritesContract {
         public static Uri buildFavoritesUri(long _id) {
             return ContentUris.withAppendedId(CONTENT_URI, _id);
         }
-
-        public static Uri buildFavoritesUri() {
-            return CONTENT_URI.buildUpon().build();
-        }
     }
 }

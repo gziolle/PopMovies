@@ -49,6 +49,7 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
         ImageView imageView = (ImageView) convertView.findViewById(R.id.poster);
 
         //Download the image using Picasso API
+        String posterPath = movieItem.getPosterPath();
         Picasso.with(mContext).load(movieItem.getPosterPath())
                 .error(R.mipmap.ic_launcher).fit().into(imageView);
 

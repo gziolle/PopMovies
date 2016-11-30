@@ -1,8 +1,10 @@
 package com.example.gziolle.popmovies;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -19,6 +21,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
+
+import com.example.gziolle.popmovies.data.FavoritesContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,10 +52,19 @@ public class MovieListFragment extends Fragment {
     public static String TMDB_VOTE_AVERAGE = "vote_average";
     public static String TMDB_RELEASE_DATE = "release_date";
 
+    public static int ROW_ID = 0;
+    public static int MOVIE_ID = 1;
+    public static int MOVIE_TITLE = 2;
+    public static int MOVIE_POSTER_PATH = 3;
+    public static int MOVIE_OVERVIEW = 4;
+    public static int MOVIE_AVERAGE = 5;
+    public static int MOVIE_RELEASE_DATE = 6;
+
+
     public GridView mGridView;
     public MovieAdapter mMovieAdapter;
     public ArrayList<MovieItem> mMovieItems;
-    private int currentPage = 0;
+    private int currentPage = 1;
     private String lastQueryMode = "";
     private boolean mIsFetching = false;
 
@@ -87,9 +100,11 @@ public class MovieListFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView absListView,int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                int currentItem = firstVisibleItem + visibleItemCount;
-                if(currentItem == totalItemCount && !mIsFetching){
-                    updateMovieList();
+                if (!lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
+                    int currentItem = firstVisibleItem + visibleItemCount;
+                    if (currentItem == totalItemCount && !mIsFetching) {
+                        updateMovieList();
+                    }
                 }
             }
             @Override
@@ -98,6 +113,14 @@ public class MovieListFragment extends Fragment {
             }
         });
         return rootView;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //Add the default query mode to lastQueryMode.
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        lastQueryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
     }
 
     @Override
@@ -111,24 +134,23 @@ public class MovieListFragment extends Fragment {
         ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
+
+        //Get the favorites and add them to the list. No need for a web query.
+
         if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
             //Get the sharedPreference and start the AsyncTask
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-            String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
             if (lastQueryMode.equals("")) {
                 lastQueryMode = queryMode;
-            } else if (!lastQueryMode.equals(queryMode)) {
+            } else if (!lastQueryMode.equals(queryMode) || lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
                 mMovieItems.clear();
                 currentPage = 1;
                 lastQueryMode = queryMode;
             } else {
                 currentPage++;
             }
-
             new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
-
         } else {
             Toast.makeText(getActivity(), "connectivity error", Toast.LENGTH_SHORT).show();
         }
@@ -136,12 +158,23 @@ public class MovieListFragment extends Fragment {
 
     class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem>> {
 
+        ProgressDialog mProgressDialog;
         private String TMDB_AUTHORITY = "api.themoviedb.org";
         private String TMDB_API_VERSION = "3";
         private String TMDB_MOVIE_DIR = "movie";
         private String TMDB_API_KEY = "api_key";
         private String TMDB_LANGUAGE = "language";
         private String TMDB_PAGE = "page";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setMessage(getActivity().getString(R.string.progress_message));
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
 
         @Override
         protected ArrayList<MovieItem> doInBackground(String... params) {
@@ -152,7 +185,7 @@ public class MovieListFragment extends Fragment {
             InputStream is;
             BufferedReader reader = null;
             String moviesJSONString;
-            ArrayList<MovieItem> movieItems = null;
+            ArrayList<MovieItem> movieItems = new ArrayList<>();
 
             if (params[0] == null) {
                 return null;
@@ -161,59 +194,99 @@ public class MovieListFragment extends Fragment {
             String queryMode = params[0];
             String currentPage = params[1];
 
-            try {
-                Uri.Builder builder = new Uri.Builder();
-                builder.scheme("http");
-                builder.authority(TMDB_AUTHORITY);
-                builder.appendPath(TMDB_API_VERSION).appendPath(TMDB_MOVIE_DIR).appendPath(queryMode);
-                builder.appendQueryParameter(TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
-                builder.appendQueryParameter(TMDB_LANGUAGE, "en-us");
-                builder.appendQueryParameter(TMDB_PAGE, currentPage);
+            if (getActivity().getString(R.string.query_mode_favorites).equals(queryMode)) {
+                String[] projection = {FavoritesContract.FavoritesEntry._ID,
+                        FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID,
+                        FavoritesContract.FavoritesEntry.COLUMN_TITLE,
+                        FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH,
+                        FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW,
+                        FavoritesContract.FavoritesEntry.COLUMN_AVERAGE,
+                        FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE};
+                Cursor favoriteMovies = getActivity().getContentResolver().query(FavoritesContract.FavoritesEntry.CONTENT_URI, projection, null, null, null);
 
-                URL queryUrl = new URL(builder.build().toString());
+                if (favoriteMovies.moveToFirst()) {
 
-                conn = (HttpURLConnection) queryUrl.openConnection();
-                conn.setRequestMethod("GET");
-                conn.connect();
+                    MovieItem item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
+                            favoriteMovies.getString(MOVIE_TITLE),
+                            favoriteMovies.getString(MOVIE_POSTER_PATH),
+                            favoriteMovies.getString(MOVIE_OVERVIEW),
+                            favoriteMovies.getDouble(MOVIE_AVERAGE),
+                            favoriteMovies.getString(MOVIE_RELEASE_DATE));
+                    movieItems.add(item);
 
-                is = conn.getInputStream();
+                    while (favoriteMovies.moveToNext()) {
+                        item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
+                                favoriteMovies.getString(MOVIE_TITLE),
+                                favoriteMovies.getString(MOVIE_POSTER_PATH),
+                                favoriteMovies.getString(MOVIE_OVERVIEW),
+                                favoriteMovies.getDouble(MOVIE_AVERAGE),
+                                favoriteMovies.getString(MOVIE_RELEASE_DATE));
+                        movieItems.add(item);
+                    }
 
-                //Error handling
-                if (is == null) {
-                    return null;
+                } else {
+                    Toast.makeText(getActivity(), R.string.no_favorites, Toast.LENGTH_SHORT).show();
                 }
-
-                reader = new BufferedReader(new InputStreamReader(is));
-
-                String line;
-                StringBuffer buffer = new StringBuffer();
-
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
+                if (!favoriteMovies.isClosed()) {
+                    favoriteMovies.close();
                 }
+            }
+            //Make a web query to retrieve date for the other options.
+            else {
+                try {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme("http");
+                    builder.authority(TMDB_AUTHORITY);
+                    builder.appendPath(TMDB_API_VERSION).appendPath(TMDB_MOVIE_DIR).appendPath(queryMode);
+                    builder.appendQueryParameter(TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
+                    builder.appendQueryParameter(TMDB_LANGUAGE, "en-us");
+                    builder.appendQueryParameter(TMDB_PAGE, currentPage);
 
-                //Error handling
-                if (buffer.length() == 0) {
-                    return null;
-                }
+                    URL queryUrl = new URL(builder.build().toString());
 
-                moviesJSONString = buffer.toString();
+                    conn = (HttpURLConnection) queryUrl.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.connect();
 
-                movieItems = getDataFromJSON(moviesJSONString);
+                    is = conn.getInputStream();
 
-            } catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage());
+                    //Error handling
+                    if (is == null) {
+                        return null;
+                    }
 
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
+                    reader = new BufferedReader(new InputStreamReader(is));
 
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (Exception e) {
-                        Log.e(LOG_TAG, e.getMessage());
+                    String line;
+                    StringBuffer buffer = new StringBuffer();
+
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line + "\n");
+                    }
+
+                    //Error handling
+                    if (buffer.length() == 0) {
+                        return null;
+                    }
+
+                    moviesJSONString = buffer.toString();
+
+                    movieItems = getDataFromJSON(moviesJSONString);
+
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, e.getMessage());
+
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, e.getMessage());
+                        }
                     }
                 }
             }
@@ -222,16 +295,19 @@ public class MovieListFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<MovieItem> result) {
+            super.onPostExecute(result);
             mIsFetching = false;
+            mProgressDialog.dismiss();
+
             if (result != null) {
                 mMovieItems.addAll(result);
                 mMovieAdapter.notifyDataSetChanged();
             }
-            super.onPostExecute(result);
         }
 
         ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
             ArrayList<MovieItem> movieItems = new ArrayList<>();
+            String posterPathAuthority = "http://image.tmdb.org/t/p/w185";
 
             JSONObject mainObject = new JSONObject(JSONString);
 
@@ -241,7 +317,7 @@ public class MovieListFragment extends Fragment {
                 JSONObject movie = moviesArray.getJSONObject(i);
                 //long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate
                 MovieItem item = new MovieItem(movie.getLong(TMDB_ID), movie.getString(TMDB_TITLE),
-                        movie.getString(TMDB_POSTER_PATH), movie.getString(TMDB_OVERVIEW),
+                        posterPathAuthority + movie.getString(TMDB_POSTER_PATH), movie.getString(TMDB_OVERVIEW),
                         movie.getDouble(TMDB_VOTE_AVERAGE), movie.getString(TMDB_RELEASE_DATE));
                 movieItems.add(item);
             }

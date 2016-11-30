@@ -8,7 +8,6 @@ public class MovieItem {
 
     private static final String AUTHORITY = "http://image.tmdb.org/t/p/w185";
 
-
     private long _id;
     private String title;
     private String posterPath;
@@ -20,7 +19,7 @@ public class MovieItem {
     public MovieItem(long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate) {
         this._id = _id;
         this.title = original_title;
-        this.posterPath = AUTHORITY + posterPath;
+        this.posterPath = posterPath;
         this.overview = overview;
         this.average = vote_average;
         this.releaseDate = releaseDate;

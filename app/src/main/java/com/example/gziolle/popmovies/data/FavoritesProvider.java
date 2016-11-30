@@ -7,7 +7,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by gziolle on 11/10/2016.
@@ -44,7 +46,7 @@ public class FavoritesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
 
         final int match = mUriMatcher.match(uri);
@@ -62,13 +64,18 @@ public class FavoritesProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Failed to query rows on " + uri);
         }
-        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
-        return retCursor;
+        try {
+            retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+            return retCursor;
+        } catch (NullPointerException ex) {
+            Log.e("Ziolle", ex.getMessage());
+        }
+        return null;
     }
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         final int match = mUriMatcher.match(uri);
 
         switch (match) {
@@ -81,7 +88,7 @@ public class FavoritesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         Uri returnUri = null;
@@ -103,7 +110,7 @@ public class FavoritesProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         int rowsCount;
@@ -125,7 +132,7 @@ public class FavoritesProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         int rowsCount;

@@ -6,15 +6,21 @@
     <string name="query_mode_key" translatable="false">query_mode</string>
     <string name="trailer">Trailer</string>
     <string name="trailers">Trailers</string>
-    <string name="progress_message">Please wait...</string>
+    <string name="progress_message">Please wait&#8230;</string>
+    <string name="query_mode_favorites">favorites</string>
+    <string name="no_favorites">No favorites!</string>
 
     <string-array name="query_mode_options">
         <item>Popular</item>
         <item>Highest Rated</item>
+        <item>Favorites</item>
+        <!--<item>Upcoming</item>!-->
     </string-array>
 
     <string-array name="query_mode_values">
         <item>popular</item>
         <item>top_rated</item>
+        <item>favorites</item>
+        <!--<item>upcoming</item>!-->
     </string-array>
 </resources>

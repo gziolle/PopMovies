@@ -2,21 +2,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/trailer_list_item_padding">
+    android:layout_marginRight="@dimen/trailer_list_item_padding"
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/trailer_image"
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/youtube" />
+        android:elevation="@dimen/card_view_elevation"
+        card_view:cardBackgroundColor="@color/light_gray"
+        card_view:cardCornerRadius="8dp">
 
-    <TextView
-        android:id="@+id/trailer_summary"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:textColor="@color/white" />
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="@dimen/card_view_width"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/trailer_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/card_view_margin"
+                android:src="@drawable/youtube" />
+
+            <TextView
+                android:id="@+id/trailer_summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
 
 </LinearLayout>
