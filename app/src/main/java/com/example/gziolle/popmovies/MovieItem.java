@@ -6,8 +6,6 @@ package com.example.gziolle.popmovies;
 
 public class MovieItem {
 
-    private static final String AUTHORITY = "http://image.tmdb.org/t/p/w185";
-
     private long _id;
     private String title;
     private String posterPath;

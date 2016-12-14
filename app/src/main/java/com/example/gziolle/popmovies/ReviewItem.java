@@ -6,15 +6,31 @@ package com.example.gziolle.popmovies;
 
 public class ReviewItem {
 
-    public String id;
-    public String author;
-    public String sneakPeek;
-    public String url;
+    private String id;
+    private String author;
+    private String content;
+    private String url;
 
-    public ReviewItem(String id, String author, String sneakPeek, String url) {
+    public ReviewItem(String id, String author, String content, String url) {
         this.id = id;
         this.author = author;
-        this.sneakPeek = sneakPeek;
+        this.content = content;
         this.url = url;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

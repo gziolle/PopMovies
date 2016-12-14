@@ -64,7 +64,7 @@ public class MovieListFragment extends Fragment {
     public GridView mGridView;
     public MovieAdapter mMovieAdapter;
     public ArrayList<MovieItem> mMovieItems;
-    private int currentPage = 1;
+    private int currentPage = 0;
     private String lastQueryMode = "";
     private boolean mIsFetching = false;
 
@@ -143,6 +143,7 @@ public class MovieListFragment extends Fragment {
             //Get the sharedPreference and start the AsyncTask
             if (lastQueryMode.equals("")) {
                 lastQueryMode = queryMode;
+                currentPage = 1;
             } else if (!lastQueryMode.equals(queryMode) || lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
                 mMovieItems.clear();
                 currentPage = 1;

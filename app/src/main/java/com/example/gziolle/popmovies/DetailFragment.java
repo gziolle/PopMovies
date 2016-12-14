@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -48,11 +47,10 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     public static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
     public ArrayList<TrailerItem> mMovieTrailers = new ArrayList<>();
-    //public ArrayList<String> mMovieReviews = new ArrayList<>();
+    public ArrayList<ReviewItem> mMovieReviews = new ArrayList<>();
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView.Adapter mTrailerAdapter;
+    private RecyclerView.Adapter mReviewAdapter;
     private ImageButton mImageButton;
     private Bundle mBundle;
 
@@ -61,14 +59,24 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailer_list);
-        mRecyclerView.setHasFixedSize(true);
+        RecyclerView trailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailer_list);
+        trailerRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager trailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        trailerRecyclerView.setLayoutManager(trailerLayoutManager);
 
-        mAdapter = new TrailerAdapter(getActivity(), mMovieTrailers, this);
-        mRecyclerView.setAdapter(mAdapter);
+        mTrailerAdapter = new TrailerAdapter(getActivity(), mMovieTrailers, this);
+        trailerRecyclerView.setAdapter(mTrailerAdapter);
+
+        RecyclerView reviewRecyclerView = (RecyclerView) rootView.findViewById(R.id.review_list);
+        reviewRecyclerView.setNestedScrollingEnabled(false);
+
+        RecyclerView.LayoutManager reviewLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        reviewRecyclerView.setLayoutManager(reviewLayoutManager);
+
+        mReviewAdapter = new ReviewAdapter(getActivity(), mMovieReviews);
+        reviewRecyclerView.setAdapter(mReviewAdapter);
+
 
         mImageButton = (ImageButton) rootView.findViewById(R.id.favorite_button);
 
@@ -115,12 +123,13 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         }
     }
 
-    private void updateTrailerList(Long id) {
+    private void updateTrailerAndReviewList(Long id) {
         ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
 
         if (networkInfo.isAvailable() && networkInfo.isConnected()) {
             new FetchTrailersTask().execute(String.valueOf(id));
+            new FetchReviewsTask().execute(String.valueOf(id));
         }
     }
 
@@ -138,7 +147,8 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         releaseDate.setText(bundle.getString(MovieListFragment.TMDB_RELEASE_DATE));
 
         TextView voteAverage = (TextView) getActivity().findViewById(R.id.average);
-        voteAverage.setText(bundle.getDouble(MovieListFragment.TMDB_VOTE_AVERAGE) + "/10");
+        String average = String.format(getActivity().getResources().getString(R.string.average_note), bundle.getDouble(MovieListFragment.TMDB_VOTE_AVERAGE));
+        voteAverage.setText(average);
 
         TextView overview = (TextView) getActivity().findViewById(R.id.overview);
         overview.setText(bundle.getString(MovieListFragment.TMDB_OVERVIEW));
@@ -161,7 +171,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         }
 
         try {
-            updateTrailerList(bundle.getLong(MovieListFragment.TMDB_ID));
+            updateTrailerAndReviewList(bundle.getLong(MovieListFragment.TMDB_ID));
         } catch (NullPointerException nex) {
             Log.e(LOG_TAG, "NullPointerException " + nex.getMessage());
         }
@@ -204,7 +214,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
         }
-
 
         @Override
         protected ArrayList<TrailerItem> doInBackground(String... params) {
@@ -286,7 +295,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
             if (trailerList != null) {
                 mMovieTrailers.addAll(trailerList);
-                mAdapter.notifyDataSetChanged();
+                mTrailerAdapter.notifyDataSetChanged();
             }
         }
 
@@ -305,4 +314,118 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             return trailerList;
         }
     }
+
+
+    class FetchReviewsTask extends AsyncTask<String, Void, ArrayList<ReviewItem>> {
+
+        private static final String RESULTS = "results";
+        private final String LOG_TAG = FetchReviewsTask.class.getSimpleName();
+        private String TMDB_AUTHORITY = "api.themoviedb.org";
+        private String TMDB_API_VERSION = "3";
+        private String TMDB_MOVIE_DIR = "movie";
+        private String TMDB_MOVIE_VIDEOS = "reviews";
+        private String TMDB_API_KEY = "api_key";
+        private String TMDB_LANGUAGE = "language";
+        private String TMDB_PAGE = "page";
+
+        private String TMDB_ID = "id";
+        private String TMDB_AUTHOR = "author";
+        private String TMDB_CONTENT = "content";
+        private String TMDB_URL = "url";
+
+        @Override
+        protected ArrayList<ReviewItem> doInBackground(String... params) {
+
+            HttpURLConnection conn = null;
+            InputStream is;
+            BufferedReader reader = null;
+            String jResult;
+            ArrayList<ReviewItem> reviewList = new ArrayList<>();
+
+            if (params[0] == null) {
+                return null;
+            }
+
+            try {
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme("http");
+                builder.authority(TMDB_AUTHORITY);
+                builder.appendPath(TMDB_API_VERSION).appendPath(TMDB_MOVIE_DIR).appendPath(params[0]).appendPath(TMDB_MOVIE_VIDEOS);
+                builder.appendQueryParameter(TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
+                builder.appendQueryParameter(TMDB_LANGUAGE, "en-us");
+                builder.appendQueryParameter(TMDB_PAGE, "1");
+
+                URL queryUrl = new URL(builder.build().toString());
+
+                conn = (HttpURLConnection) queryUrl.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
+
+                is = conn.getInputStream();
+
+                //Error handling
+                if (is == null) {
+                    return null;
+                }
+
+                reader = new BufferedReader(new InputStreamReader(is));
+
+                String line;
+                StringBuffer buffer = new StringBuffer();
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line + "\n");
+                }
+
+                //Error handling
+                if (buffer.length() == 0) {
+                    return null;
+                }
+
+                jResult = buffer.toString();
+
+                reviewList = getDataFromJSON(jResult);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, e.getMessage());
+                    }
+                }
+            }
+            return reviewList;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<ReviewItem> reviewList) {
+            super.onPostExecute(reviewList);
+            if (reviewList != null) {
+                Log.d("Ziolle", "reviewList.size = " + reviewList.size());
+                mMovieReviews.addAll(reviewList);
+                mReviewAdapter.notifyDataSetChanged();
+            }
+        }
+
+        private ArrayList<ReviewItem> getDataFromJSON(String jString) throws JSONException {
+            ArrayList<ReviewItem> reviewList = new ArrayList<>();
+
+            JSONObject mainObject = new JSONObject(jString);
+            JSONArray reviewArray = mainObject.getJSONArray(RESULTS);
+
+            for (int i = 0; i < reviewArray.length(); i++) {
+                JSONObject trailer = reviewArray.getJSONObject(i);
+                reviewList.add(new ReviewItem(trailer.getString(TMDB_ID), trailer.getString(TMDB_AUTHOR), trailer.getString(TMDB_CONTENT), trailer.getString(TMDB_URL)));
+            }
+            return reviewList;
+        }
+    }
 }
+

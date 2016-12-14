@@ -31,8 +31,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.trailer_list_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -49,9 +48,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
         void recyclerViewListClicked(View v, int position);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public ImageView mIcon;
-        public TextView mSummary;
+    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView mIcon;
+        TextView mSummary;
 
         public ViewHolder(View itemView) {
             super(itemView);
