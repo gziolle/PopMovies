@@ -23,6 +23,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.example.gziolle.popmovies.data.FavoritesContract;
+import com.example.gziolle.popmovies.utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,14 +44,6 @@ import java.util.ArrayList;
 public class MovieListFragment extends Fragment {
 
     public static final String LOG_TAG = MovieListFragment.class.getSimpleName();
-
-    public static String TMDB_RESULTS = "results";
-    public static String TMDB_ID = "id";
-    public static String TMDB_TITLE = "title";
-    public static String TMDB_POSTER_PATH = "poster_path";
-    public static String TMDB_OVERVIEW = "overview";
-    public static String TMDB_VOTE_AVERAGE = "vote_average";
-    public static String TMDB_RELEASE_DATE = "release_date";
 
     public static int ROW_ID = 0;
     public static int MOVIE_ID = 1;
@@ -84,22 +77,13 @@ public class MovieListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 MovieItem item = mMovieAdapter.getItem(position);
-
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra(TMDB_ID, item.get_id());
-                intent.putExtra(TMDB_TITLE, item.getTitle());
-                intent.putExtra(TMDB_POSTER_PATH, item.getPosterPath());
-                intent.putExtra(TMDB_RELEASE_DATE, item.getReleaseDate());
-                intent.putExtra(TMDB_OVERVIEW, item.getOverview());
-                intent.putExtra(TMDB_VOTE_AVERAGE, item.getAverage());
-                startActivity(intent);
+                ((Callback) getActivity()).onItemSelected(item);
             }
         });
 
         mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-
             @Override
-            public void onScroll(AbsListView absListView,int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (!lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
                     int currentItem = firstVisibleItem + visibleItemCount;
                     if (currentItem == totalItemCount && !mIsFetching) {
@@ -108,8 +92,7 @@ public class MovieListFragment extends Fragment {
                 }
             }
             @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-
+            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
             }
         });
         return rootView;
@@ -157,15 +140,22 @@ public class MovieListFragment extends Fragment {
         }
     }
 
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(MovieItem item);
+    }
+
     class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem>> {
 
+        private static final String RESULTS = "results";
         ProgressDialog mProgressDialog;
-        private String TMDB_AUTHORITY = "api.themoviedb.org";
-        private String TMDB_API_VERSION = "3";
-        private String TMDB_MOVIE_DIR = "movie";
-        private String TMDB_API_KEY = "api_key";
-        private String TMDB_LANGUAGE = "language";
-        private String TMDB_PAGE = "page";
 
         @Override
         protected void onPreExecute() {
@@ -173,7 +163,7 @@ public class MovieListFragment extends Fragment {
             mProgressDialog = new ProgressDialog(getActivity());
             mProgressDialog.setMessage(getActivity().getString(R.string.progress_message));
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setCancelable(false);
+            mProgressDialog.setCancelable(true);
             mProgressDialog.show();
         }
 
@@ -226,7 +216,7 @@ public class MovieListFragment extends Fragment {
                     }
 
                 } else {
-                    Toast.makeText(getActivity(), R.string.no_favorites, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), R.string.no_favorites, Toast.LENGTH_SHORT).show();
                 }
                 if (!favoriteMovies.isClosed()) {
                     favoriteMovies.close();
@@ -237,11 +227,11 @@ public class MovieListFragment extends Fragment {
                 try {
                     Uri.Builder builder = new Uri.Builder();
                     builder.scheme("http");
-                    builder.authority(TMDB_AUTHORITY);
-                    builder.appendPath(TMDB_API_VERSION).appendPath(TMDB_MOVIE_DIR).appendPath(queryMode);
-                    builder.appendQueryParameter(TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
-                    builder.appendQueryParameter(TMDB_LANGUAGE, "en-us");
-                    builder.appendQueryParameter(TMDB_PAGE, currentPage);
+                    builder.authority(Utility.TMDB_AUTHORITY);
+                    builder.appendPath(Utility.TMDB_API_VERSION).appendPath(Utility.TMDB_MOVIE_DIR).appendPath(queryMode);
+                    builder.appendQueryParameter(Utility.TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
+                    builder.appendQueryParameter(Utility.TMDB_LANGUAGE, "en-us");
+                    builder.appendQueryParameter(Utility.TMDB_PAGE, currentPage);
 
                     URL queryUrl = new URL(builder.build().toString());
 
@@ -297,29 +287,27 @@ public class MovieListFragment extends Fragment {
         @Override
         protected void onPostExecute(ArrayList<MovieItem> result) {
             super.onPostExecute(result);
-            mIsFetching = false;
             mProgressDialog.dismiss();
-
             if (result != null) {
                 mMovieItems.addAll(result);
                 mMovieAdapter.notifyDataSetChanged();
             }
+
+            mIsFetching = false;
         }
 
         ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
             ArrayList<MovieItem> movieItems = new ArrayList<>();
-            String posterPathAuthority = "http://image.tmdb.org/t/p/w185";
-
             JSONObject mainObject = new JSONObject(JSONString);
 
-            JSONArray moviesArray = mainObject.getJSONArray(TMDB_RESULTS);
+            JSONArray moviesArray = mainObject.getJSONArray(RESULTS);
 
             for (int i = 0; i < moviesArray.length(); i++) {
                 JSONObject movie = moviesArray.getJSONObject(i);
                 //long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate
-                MovieItem item = new MovieItem(movie.getLong(TMDB_ID), movie.getString(TMDB_TITLE),
-                        posterPathAuthority + movie.getString(TMDB_POSTER_PATH), movie.getString(TMDB_OVERVIEW),
-                        movie.getDouble(TMDB_VOTE_AVERAGE), movie.getString(TMDB_RELEASE_DATE));
+                MovieItem item = new MovieItem(movie.getLong(Utility.TMDB_ID), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE),
+                        Utility.POSTER_PATH_AUTHORITY + movie.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW),
+                        movie.getDouble(Utility.VOTE_AVERAGE), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
                 movieItems.add(item);
             }
             return movieItems;

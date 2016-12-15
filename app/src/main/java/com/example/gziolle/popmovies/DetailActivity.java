@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.gziolle.popmovies.data.FavoritesContract;
+
 /**
  * Created by gziolle on 10/18/2016.
  */
@@ -21,12 +23,12 @@ public class DetailActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
 
         if (intent != null) {
-            bundle.putLong(MovieListFragment.TMDB_ID, intent.getLongExtra(MovieListFragment.TMDB_ID, 0));
-            bundle.putString(MovieListFragment.TMDB_TITLE, intent.getStringExtra(MovieListFragment.TMDB_TITLE));
-            bundle.putString(MovieListFragment.TMDB_POSTER_PATH, intent.getStringExtra(MovieListFragment.TMDB_POSTER_PATH));
-            bundle.putString(MovieListFragment.TMDB_RELEASE_DATE, intent.getStringExtra(MovieListFragment.TMDB_RELEASE_DATE));
-            bundle.putString(MovieListFragment.TMDB_OVERVIEW, intent.getStringExtra(MovieListFragment.TMDB_OVERVIEW));
-            bundle.putDouble(MovieListFragment.TMDB_VOTE_AVERAGE, intent.getDoubleExtra(MovieListFragment.TMDB_VOTE_AVERAGE, 0));
+            bundle.putLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, intent.getLongExtra(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, 0));
+            bundle.putString(FavoritesContract.FavoritesEntry.COLUMN_TITLE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+            bundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH));
+            bundle.putString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+            bundle.putString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
+            bundle.putDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, intent.getDoubleExtra(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, 0));
         }
 
         if (savedInstanceState == null) {
