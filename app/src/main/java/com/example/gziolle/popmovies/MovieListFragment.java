@@ -2,7 +2,6 @@ package com.example.gziolle.popmovies;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -122,21 +121,28 @@ public class MovieListFragment extends Fragment {
 
         //Get the favorites and add them to the list. No need for a web query.
 
-        if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
-            //Get the sharedPreference and start the AsyncTask
-            if (lastQueryMode.equals("")) {
-                lastQueryMode = queryMode;
-                currentPage = 1;
-            } else if (!lastQueryMode.equals(queryMode) || lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
-                mMovieItems.clear();
-                currentPage = 1;
-                lastQueryMode = queryMode;
-            } else {
-                currentPage++;
-            }
+        if (queryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
+            mMovieItems.clear();
+            currentPage = 1;
+            lastQueryMode = getActivity().getString(R.string.query_mode_favorites);
             new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
         } else {
-            Toast.makeText(getActivity(), "connectivity error", Toast.LENGTH_SHORT).show();
+            if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
+                //Get the preference's value and start the AsyncTask
+                if (lastQueryMode.equals("")) {
+                    lastQueryMode = queryMode;
+                    currentPage = 1;
+                } else if (!lastQueryMode.equals(queryMode)) {
+                    mMovieItems.clear();
+                    currentPage = 1;
+                    lastQueryMode = queryMode;
+                } else {
+                    currentPage++;
+                }
+                new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
+            } else {
+                Toast.makeText(getActivity(), "connectivity error", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -176,7 +182,7 @@ public class MovieListFragment extends Fragment {
             InputStream is;
             BufferedReader reader = null;
             String moviesJSONString;
-            ArrayList<MovieItem> movieItems = new ArrayList<>();
+            ArrayList<MovieItem> movieList = new ArrayList<>();
 
             if (params[0] == null) {
                 return null;
@@ -186,41 +192,7 @@ public class MovieListFragment extends Fragment {
             String currentPage = params[1];
 
             if (getActivity().getString(R.string.query_mode_favorites).equals(queryMode)) {
-                String[] projection = {FavoritesContract.FavoritesEntry._ID,
-                        FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID,
-                        FavoritesContract.FavoritesEntry.COLUMN_TITLE,
-                        FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH,
-                        FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW,
-                        FavoritesContract.FavoritesEntry.COLUMN_AVERAGE,
-                        FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE};
-                Cursor favoriteMovies = getActivity().getContentResolver().query(FavoritesContract.FavoritesEntry.CONTENT_URI, projection, null, null, null);
-
-                if (favoriteMovies.moveToFirst()) {
-
-                    MovieItem item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
-                            favoriteMovies.getString(MOVIE_TITLE),
-                            favoriteMovies.getString(MOVIE_POSTER_PATH),
-                            favoriteMovies.getString(MOVIE_OVERVIEW),
-                            favoriteMovies.getDouble(MOVIE_AVERAGE),
-                            favoriteMovies.getString(MOVIE_RELEASE_DATE));
-                    movieItems.add(item);
-
-                    while (favoriteMovies.moveToNext()) {
-                        item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
-                                favoriteMovies.getString(MOVIE_TITLE),
-                                favoriteMovies.getString(MOVIE_POSTER_PATH),
-                                favoriteMovies.getString(MOVIE_OVERVIEW),
-                                favoriteMovies.getDouble(MOVIE_AVERAGE),
-                                favoriteMovies.getString(MOVIE_RELEASE_DATE));
-                        movieItems.add(item);
-                    }
-
-                } else {
-                    //Toast.makeText(getActivity(), R.string.no_favorites, Toast.LENGTH_SHORT).show();
-                }
-                if (!favoriteMovies.isClosed()) {
-                    favoriteMovies.close();
-                }
+                movieList = getDataFromDatabase();
             }
             //Make a web query to retrieve date for the other options.
             else {
@@ -262,7 +234,7 @@ public class MovieListFragment extends Fragment {
 
                     moviesJSONString = buffer.toString();
 
-                    movieItems = getDataFromJSON(moviesJSONString);
+                    movieList = getDataFromJSON(moviesJSONString);
 
                 } catch (Exception e) {
                     Log.e(LOG_TAG, e.getMessage());
@@ -281,7 +253,7 @@ public class MovieListFragment extends Fragment {
                     }
                 }
             }
-            return movieItems;
+            return movieList;
         }
 
         @Override
@@ -306,11 +278,43 @@ public class MovieListFragment extends Fragment {
                 JSONObject movie = moviesArray.getJSONObject(i);
                 //long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate
                 MovieItem item = new MovieItem(movie.getLong(Utility.TMDB_ID), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE),
-                        Utility.POSTER_PATH_AUTHORITY + movie.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW),
+                        movie.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW),
                         movie.getDouble(Utility.VOTE_AVERAGE), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
                 movieItems.add(item);
             }
             return movieItems;
+        }
+
+        ArrayList<MovieItem> getDataFromDatabase() {
+
+            ArrayList<MovieItem> movieList = new ArrayList<>();
+            String[] projection = {FavoritesContract.FavoritesEntry._ID,
+                    FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID,
+                    FavoritesContract.FavoritesEntry.COLUMN_TITLE,
+                    FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH,
+                    FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW,
+                    FavoritesContract.FavoritesEntry.COLUMN_AVERAGE,
+                    FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE};
+
+
+            Cursor favoriteMovies = getActivity().getContentResolver().query(FavoritesContract.FavoritesEntry.CONTENT_URI, projection, null, null, null);
+
+            if (favoriteMovies != null) {
+                while (favoriteMovies.moveToNext()) {
+                    MovieItem item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
+                            favoriteMovies.getString(MOVIE_TITLE),
+                            favoriteMovies.getString(MOVIE_POSTER_PATH),
+                            favoriteMovies.getString(MOVIE_OVERVIEW),
+                            favoriteMovies.getDouble(MOVIE_AVERAGE),
+                            favoriteMovies.getString(MOVIE_RELEASE_DATE));
+                    movieList.add(item);
+                }
+            }
+
+            if (favoriteMovies != null && !favoriteMovies.isClosed()) {
+                favoriteMovies.close();
+            }
+            return movieList;
         }
     }
 }

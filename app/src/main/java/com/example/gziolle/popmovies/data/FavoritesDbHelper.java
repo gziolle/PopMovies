@@ -24,6 +24,8 @@ public class FavoritesDbHelper extends SQLiteOpenHelper {
             FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL," +
             " UNIQUE (" + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + ") ON CONFLICT IGNORE);";
 
+    private static final String DELETE_FAVORTTES_TABLE = "DROP TABLE IF EXISTS " + FavoritesContract.FavoritesEntry.TABLE_NAME + ";";
+
     public FavoritesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -35,7 +37,7 @@ public class FavoritesDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + FavoritesContract.FavoritesEntry.TABLE_NAME + ";");
+        sqLiteDatabase.execSQL(DELETE_FAVORTTES_TABLE);
         onCreate(sqLiteDatabase);
     }
 }

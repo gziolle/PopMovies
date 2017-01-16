@@ -7,8 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.example.gziolle.popmovies.utils.Utility;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -48,12 +50,19 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
         }
         ImageView imageView = (ImageView) convertView.findViewById(R.id.poster);
 
-        //Download the image using Picasso API
-        Picasso.with(mContext).load(movieItem.getPosterPath())
-                .error(R.mipmap.ic_launcher).fit().into(imageView);
+        String moviePosterPath = movieItem.getPosterPath();
+        if (!moviePosterPath.startsWith("/data")) {
+            moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
+            //Download the image using Picasso API
+            Picasso.with(mContext).load(moviePosterPath)
+                    .error(R.mipmap.ic_launcher).fit().into(imageView);
+        } else {
+            File posterFile = new File(moviePosterPath);
+            Picasso.with(mContext).load(posterFile)
+                    .error(R.mipmap.ic_launcher).fit().into(imageView);
+        }
 
         imageView.setAdjustViewBounds(true);
-
         return convertView;
     }
 }

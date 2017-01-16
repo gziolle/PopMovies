@@ -1,10 +1,10 @@
 package com.example.gziolle.popmovies;
 
 import android.content.ActivityNotFoundException;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,11 +24,14 @@ import android.widget.TextView;
 import com.example.gziolle.popmovies.data.FavoritesContract;
 import com.example.gziolle.popmovies.utils.FetchReviewsTask;
 import com.example.gziolle.popmovies.utils.FetchTrailersTask;
+import com.example.gziolle.popmovies.utils.Utility;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 /**
  * Created by gziolle on 10/19/2016.
@@ -65,30 +68,34 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
         //TODO
         // make a query to check id the movie is already a favorite one.
-        // If so, set the imagebutton as selected.
+        // If so, set the ImageButton as selected.
         mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!mImageButton.isSelected()) {
-                    mImageButton.setSelected(true);
-                    //add movie to the database
-                    ContentValues values = new ContentValues();
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, String.valueOf(mBundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID)));
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_TITLE, mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH));
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, String.valueOf(mBundle.getDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE)));
-                    values.put(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+                    String posterFileName = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+                    Bitmap poster = Utility.getImageFromUrl(Utility.POSTER_PATH_AUTHORITY + posterFileName);
+                    if (poster != null) {
+                        String filePath = Utility.savePosterIntoStorage(mBundle, getActivity(), poster);
+                        mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
+                        Log.d("Ziolle", "posterUrl = " + filePath);
+                    }
 
-                    Uri rowUri = getActivity().getContentResolver().insert(FavoritesContract.FavoritesEntry.CONTENT_URI, values);
+                    //Try to add movie into the database.
+                    //If it does not work, a toast is displayed to the user.
+                    if (Utility.insertMovieIntoDB(mBundle, getActivity())) {
+                        mImageButton.setSelected(true);
+                    } else {
+                        Toast.makeText(getActivity(), "Couldn't save this movie as a favorite", Toast.LENGTH_SHORT).show();
+                    }
+
                 } else {
-                    mImageButton.setSelected(false);
                     //delete movie from the database
-
-                    String selection = FavoritesContract.FavoritesEntry.TABLE_NAME + "." + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(mBundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID))};
-
-                    int rowsCount = getActivity().getContentResolver().delete(FavoritesContract.FavoritesEntry.CONTENT_URI, selection, selectionArgs);
+                    if (Utility.deleteMovieFromDB(mBundle, getActivity())) {
+                        mImageButton.setSelected(false);
+                    } else {
+                        Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's lisr", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -121,9 +128,17 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         title.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
 
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
-        String posterUrl = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
-        Picasso.with(getActivity()).load(posterUrl)
-                .error(R.mipmap.ic_launcher).fit().into(moviePoster);
+        String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+        if (!moviePosterPath.startsWith("/data")) {
+            moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
+            //Download the image using Picasso API
+            Picasso.with(getActivity()).load(moviePosterPath)
+                    .error(R.mipmap.ic_launcher).fit().into(moviePoster);
+        } else {
+            File posterFile = new File(moviePosterPath);
+            Picasso.with(getActivity()).load(posterFile)
+                    .error(R.mipmap.ic_launcher).fit().into(moviePoster);
+        }
 
         TextView releaseDate = (TextView) getActivity().findViewById(R.id.release_date);
         releaseDate.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
@@ -151,6 +166,10 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             }
         } catch (NullPointerException ex) {
             Log.e("Ziolle", ex.getMessage());
+        } finally {
+            if (retCursor != null && !retCursor.isClosed()) {
+                retCursor.close();
+            }
         }
 
         try {

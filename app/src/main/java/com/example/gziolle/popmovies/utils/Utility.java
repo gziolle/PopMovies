@@ -1,5 +1,23 @@
 package com.example.gziolle.popmovies.utils;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+
+import com.example.gziolle.popmovies.data.FavoritesContract;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Created by gziolle on 12/15/2016.
  */
@@ -22,4 +40,77 @@ public class Utility {
     public static final String TMDB_URL = "url";
 
     public static final String VOTE_AVERAGE = "vote_average";
+
+    public static String savePosterIntoStorage(Bundle bundle, Context context, Bitmap bitmap) {
+
+        String fileName = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+        ContextWrapper cw = new ContextWrapper(context);
+
+        //path to /data/data/com.example.gziolle.popmovies/app/data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+
+        //Create the file
+        File filePath = new File(directory, fileName);
+
+        FileOutputStream fileOutputStream = null;
+
+        try {
+            fileOutputStream = new FileOutputStream(filePath);
+
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fileOutputStream.close();
+            } catch (IOException | NullPointerException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return filePath.getAbsolutePath();
+    }
+
+
+    public static Bitmap getImageFromUrl(String source) {
+        try {
+            URL url = new URL(source);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+
+            connection.connect();
+
+            InputStream is = connection.getInputStream();
+            Bitmap bitmapPoster = BitmapFactory.decodeStream(is);
+            return bitmapPoster;
+        } catch (Exception ex) {
+            return null;
+        }
+
+    }
+
+    public static boolean insertMovieIntoDB(Bundle bundle, Context context) {
+        ContentValues values = new ContentValues();
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, String.valueOf(bundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID)));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_TITLE, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, String.valueOf(bundle.getDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE)));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+
+        Uri rowUri = context.getContentResolver().insert(FavoritesContract.FavoritesEntry.CONTENT_URI, values);
+
+        return rowUri != null;
+
+    }
+
+    public static boolean deleteMovieFromDB(Bundle bundle, Context context) {
+        String selection = FavoritesContract.FavoritesEntry.TABLE_NAME + "." + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(bundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID))};
+
+        int rowsCount = context.getContentResolver().delete(FavoritesContract.FavoritesEntry.CONTENT_URI, selection, selectionArgs);
+
+        return (rowsCount != -1);
+    }
+
+
 }
