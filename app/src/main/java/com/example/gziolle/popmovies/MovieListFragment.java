@@ -83,7 +83,10 @@ public class MovieListFragment extends Fragment {
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (!lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
+                    Log.d("Ziolle", "firstVisibleItem = " + firstVisibleItem);
+                    Log.d("Ziolle", "visibleItemCount = " + visibleItemCount);
                     int currentItem = firstVisibleItem + visibleItemCount;
+                    Log.d("Ziolle", "currentItem = " + currentItem);
                     if (Utility.isConnected(getActivity()) && currentItem == totalItemCount && !mIsFetching) {
                         updateMovieList();
                     }
@@ -141,6 +144,7 @@ public class MovieListFragment extends Fragment {
                 new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
             } else {
                 //Since there is no connection, we'll clear the data source and notify that it has changed.
+                Log.d("Ziolle", "!Utility.isConnected(getActivity())");
                 mMovieItems.clear();
                 mMovieAdapter.notifyDataSetChanged();
             }
@@ -207,6 +211,8 @@ public class MovieListFragment extends Fragment {
                     builder.appendQueryParameter(Utility.TMDB_PAGE, currentPage);
 
                     URL queryUrl = new URL(builder.build().toString());
+
+                    Log.d("Ziolle", queryUrl.toString());
 
                     conn = (HttpURLConnection) queryUrl.openConnection();
                     conn.setRequestMethod("GET");

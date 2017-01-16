@@ -55,11 +55,11 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
             moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
             //Download the image using Picasso API
             Picasso.with(mContext).load(moviePosterPath)
-                    .error(R.mipmap.ic_launcher).fit().into(imageView);
+                    .error(R.mipmap.ic_launcher).into(imageView);
         } else {
             File posterFile = new File(moviePosterPath);
             Picasso.with(mContext).load(posterFile)
-                    .error(R.mipmap.ic_launcher).fit().into(imageView);
+                    .error(R.mipmap.ic_launcher).into(imageView);
         }
 
         imageView.setAdjustViewBounds(true);
