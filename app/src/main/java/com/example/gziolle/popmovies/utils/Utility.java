@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -71,16 +73,19 @@ public class Utility {
     }
 
 
-    public static Bitmap getImageFromUrl(String source) {
+    public static Bitmap getImageFromUrl(Context context, String source) {
+        Bitmap bitmapPoster = null;
         try {
-            URL url = new URL(source);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
+            if (isConnected(context)) {
+                URL url = new URL(source);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
 
-            connection.connect();
+                connection.connect();
 
-            InputStream is = connection.getInputStream();
-            Bitmap bitmapPoster = BitmapFactory.decodeStream(is);
+                InputStream is = connection.getInputStream();
+                bitmapPoster = BitmapFactory.decodeStream(is);
+            }
             return bitmapPoster;
         } catch (Exception ex) {
             return null;
@@ -110,6 +115,13 @@ public class Utility {
         int rowsCount = context.getContentResolver().delete(FavoritesContract.FavoritesEntry.CONTENT_URI, selection, selectionArgs);
 
         return (rowsCount != -1);
+    }
+
+    public static boolean isConnected(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected();
     }
 
 

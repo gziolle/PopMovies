@@ -5,7 +5,6 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/dark_grey</item>
         <item name="colorPrimaryDark">@color/very_dark_grey</item>
-        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
 </resources>

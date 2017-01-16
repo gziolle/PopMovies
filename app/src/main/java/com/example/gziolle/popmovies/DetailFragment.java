@@ -74,7 +74,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             public void onClick(View view) {
                 if (!mImageButton.isSelected()) {
                     String posterFileName = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
-                    Bitmap poster = Utility.getImageFromUrl(Utility.POSTER_PATH_AUTHORITY + posterFileName);
+                    Bitmap poster = Utility.getImageFromUrl(getActivity(), Utility.POSTER_PATH_AUTHORITY + posterFileName);
                     if (poster != null) {
                         String filePath = Utility.savePosterIntoStorage(mBundle, getActivity(), poster);
                         mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
@@ -129,6 +129,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
         String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+
         if (!moviePosterPath.startsWith("/data")) {
             moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
             //Download the image using Picasso API

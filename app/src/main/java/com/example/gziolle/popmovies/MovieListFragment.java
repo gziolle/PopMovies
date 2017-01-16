@@ -1,11 +1,8 @@
 package com.example.gziolle.popmovies;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.example.gziolle.popmovies.data.FavoritesContract;
 import com.example.gziolle.popmovies.utils.Utility;
@@ -65,10 +61,13 @@ public class MovieListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.gridview);
+        mGridView = (GridView) rootView.findViewById(R.id.grid_view);
 
         mMovieItems = new ArrayList<>();
         mMovieAdapter = new MovieAdapter(getActivity(), R.layout.grid_view_item, mMovieItems);
+
+        View emptyView = rootView.findViewById(R.id.empty_grid_view);
+        mGridView.setEmptyView(emptyView);
 
         mGridView.setAdapter(mMovieAdapter);
 
@@ -85,7 +84,7 @@ public class MovieListFragment extends Fragment {
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (!lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
                     int currentItem = firstVisibleItem + visibleItemCount;
-                    if (currentItem == totalItemCount && !mIsFetching) {
+                    if (Utility.isConnected(getActivity()) && currentItem == totalItemCount && !mIsFetching) {
                         updateMovieList();
                     }
                 }
@@ -113,21 +112,21 @@ public class MovieListFragment extends Fragment {
     }
 
     public void updateMovieList() {
-        ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
 
         //Get the favorites and add them to the list. No need for a web query.
 
         if (queryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
+
             mMovieItems.clear();
             currentPage = 1;
             lastQueryMode = getActivity().getString(R.string.query_mode_favorites);
+
             new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
+
         } else {
-            if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
+            if (Utility.isConnected(getActivity())) {
                 //Get the preference's value and start the AsyncTask
                 if (lastQueryMode.equals("")) {
                     lastQueryMode = queryMode;
@@ -141,7 +140,9 @@ public class MovieListFragment extends Fragment {
                 }
                 new FetchMoviesTask().execute(queryMode, String.valueOf(currentPage));
             } else {
-                Toast.makeText(getActivity(), "connectivity error", Toast.LENGTH_SHORT).show();
+                //Since there is no connection, we'll clear the data source and notify that it has changed.
+                mMovieItems.clear();
+                mMovieAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -264,11 +265,10 @@ public class MovieListFragment extends Fragment {
                 mMovieItems.addAll(result);
                 mMovieAdapter.notifyDataSetChanged();
             }
-
             mIsFetching = false;
         }
 
-        ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
+        private ArrayList<MovieItem> getDataFromJSON(String JSONString) throws JSONException {
             ArrayList<MovieItem> movieItems = new ArrayList<>();
             JSONObject mainObject = new JSONObject(JSONString);
 
@@ -285,7 +285,7 @@ public class MovieListFragment extends Fragment {
             return movieItems;
         }
 
-        ArrayList<MovieItem> getDataFromDatabase() {
+        private ArrayList<MovieItem> getDataFromDatabase() {
 
             ArrayList<MovieItem> movieList = new ArrayList<>();
             String[] projection = {FavoritesContract.FavoritesEntry._ID,
