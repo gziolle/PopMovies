@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +29,8 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
     public GridView mGridView;
     public MovieAdapter mMovieAdapter;
     public ArrayList<MovieItem> mMovieItems;
-    private int currentPage = 0;
+    private int mCurrentPage = 0;
     private String lastQueryMode = "";
-
-    public static boolean isFetching() {
-        return mIsFetching;
-    }
 
     public static void setIsFetching(boolean isFetching) {
         mIsFetching = isFetching;
@@ -70,6 +65,7 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
                 if (!lastQueryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
                     int currentItem = firstVisibleItem + visibleItemCount;
                     if (Utility.isConnected(getActivity()) && currentItem == totalItemCount && !mIsFetching) {
+                        mCurrentPage++;
                         updateMovieList();
                     }
                 }
@@ -92,8 +88,9 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
     @Override
     public void onStart() {
         super.onStart();
-        updateMovieList();
-
+        if (!mIsFetching) {
+            updateMovieList();
+        }
     }
 
     public void updateMovieList() {
@@ -103,27 +100,19 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
         //Get the favorites and add them to the list. No need for a web query.
 
         if (queryMode.equals(getActivity().getString(R.string.query_mode_favorites))) {
-
             mMovieItems.clear();
-            currentPage = 1;
+            mCurrentPage = 1;
             lastQueryMode = getActivity().getString(R.string.query_mode_favorites);
-
-            new FetchMoviesTask(getActivity(), this).execute(queryMode, String.valueOf(currentPage));
+            new FetchMoviesTask(getActivity(), this).execute(queryMode, String.valueOf(mCurrentPage));
 
         } else {
             if (Utility.isConnected(getActivity())) {
                 //Get the preference's value and start the AsyncTask
-                if (lastQueryMode.equals("")) {
+                if (lastQueryMode.equals("") || !lastQueryMode.equals(queryMode)) {
                     lastQueryMode = queryMode;
-                    currentPage = 1;
-                } else if (!lastQueryMode.equals(queryMode)) {
-                    mMovieItems.clear();
-                    currentPage = 1;
-                    lastQueryMode = queryMode;
-                } else {
-                    currentPage++;
+                    mCurrentPage = 1;
                 }
-                new FetchMoviesTask(getActivity(), this).execute(queryMode, String.valueOf(currentPage));
+                new FetchMoviesTask(getActivity(), this).execute(queryMode, String.valueOf(mCurrentPage));
             } else {
                 //Since there is no connection, we'll clear the data source and notify that it has changed.
                 mMovieItems.clear();
@@ -137,11 +126,11 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
 
     @Override
     public void updateMovieList(ArrayList<MovieItem> movieList) {
+        TextView emptyTextView = (TextView) getActivity().findViewById(R.id.empty_grid_view);
         if (movieList != null) {
             mMovieItems.addAll(movieList);
             mMovieAdapter.notifyDataSetChanged();
         } else {
-            TextView emptyTextView = (TextView) getActivity().findViewById(R.id.empty_grid_view);
             if (emptyTextView != null) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 int status = prefs.getInt(getActivity().getString(R.string.pref_status), Utility.STATUS_SERVER_DOWN);
