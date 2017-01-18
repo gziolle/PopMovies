@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -73,28 +74,16 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             @Override
             public void onClick(View view) {
                 if (!mImageButton.isSelected()) {
-                    String posterFileName = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
-                    Bitmap poster = Utility.getImageFromUrl(getActivity(), Utility.POSTER_PATH_AUTHORITY + posterFileName);
-                    if (poster != null) {
-                        String filePath = Utility.savePosterIntoStorage(mBundle, getActivity(), poster);
-                        mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
-                        Log.d("Ziolle", "posterUrl = " + filePath);
+                    String posterUrl = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+                    if (posterUrl != null) {
+                        new DownloadImageTask().execute(posterUrl);
                     }
-
-                    //Try to add movie into the database.
-                    //If it does not work, a toast is displayed to the user.
-                    if (Utility.insertMovieIntoDB(mBundle, getActivity())) {
-                        mImageButton.setSelected(true);
-                    } else {
-                        Toast.makeText(getActivity(), "Couldn't save this movie as a favorite", Toast.LENGTH_SHORT).show();
-                    }
-
                 } else {
                     //delete movie from the database
                     if (Utility.deleteMovieFromDB(mBundle, getActivity())) {
                         mImageButton.setSelected(false);
                     } else {
-                        Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's lisr", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's list", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -223,6 +212,39 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
             if (mReviewLayout != null) {
                 mReviewLayout.addView(layout);
+            }
+        }
+    }
+
+    class DownloadImageTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+
+            String imageSource = strings[0];
+            String filePath = null;
+
+            if (!imageSource.startsWith("/data")) {
+                imageSource = Utility.POSTER_PATH_AUTHORITY + imageSource;
+            }
+
+            Bitmap poster = Utility.getImageFromUrl(getActivity(), imageSource);
+            if (poster != null) {
+                filePath = Utility.savePosterIntoStorage(mBundle, getActivity(), poster);
+                Log.d("Ziolle", "posterUrl = " + filePath);
+            }
+            return filePath;
+        }
+
+        @Override
+        protected void onPostExecute(String filePath) {
+            super.onPostExecute(filePath);
+            if (filePath != null) {
+                mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
+            }
+            if (Utility.insertMovieIntoDB(mBundle, getActivity())) {
+                mImageButton.setSelected(true);
+            } else {
+                Toast.makeText(getActivity(), "Couldn't save this movie as a favorite", Toast.LENGTH_SHORT).show();
             }
         }
     }

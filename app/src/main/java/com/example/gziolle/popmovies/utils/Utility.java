@@ -3,13 +3,16 @@ package com.example.gziolle.popmovies.utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
+import com.example.gziolle.popmovies.R;
 import com.example.gziolle.popmovies.data.FavoritesContract;
 
 import java.io.File;
@@ -42,6 +45,10 @@ public class Utility {
     public static final String TMDB_URL = "url";
 
     public static final String VOTE_AVERAGE = "vote_average";
+
+    public static final int STATUS_SERVER_NEEDS_API_KEY = 7;
+    public static final int STATUS_RESOURCE_NOT_FOUND = 34;
+    public static final int STATUS_SERVER_DOWN = 100;
 
     public static String savePosterIntoStorage(Bundle bundle, Context context, Bitmap bitmap) {
 
@@ -80,7 +87,6 @@ public class Utility {
                 URL url = new URL(source);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
-
                 connection.connect();
 
                 InputStream is = connection.getInputStream();
@@ -88,6 +94,7 @@ public class Utility {
             }
             return bitmapPoster;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
 
@@ -124,5 +131,11 @@ public class Utility {
         return networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected();
     }
 
+    public static void storeStatusToSharedPreferences(Context context, int status) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
 
+        editor.putInt(context.getString(R.string.pref_status), status);
+        editor.commit();
+    }
 }
