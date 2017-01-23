@@ -12,7 +12,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
     public ArrayList<TrailerItem> mMovieTrailers = new ArrayList<>();
     ViewGroup mReviewLayout;
+    Toolbar mToolbar;
     private RecyclerView.Adapter mTrailerAdapter;
     private ImageButton mImageButton;
     private Bundle mBundle;
@@ -53,6 +56,16 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(mToolbar);
+
+        mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+
+        activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         RecyclerView trailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailer_list);
         trailerRecyclerView.setHasFixedSize(true);
@@ -113,8 +126,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
     public void bindView(Bundle bundle) {
 
-        TextView title = (TextView) getActivity().findViewById(R.id.title);
-        title.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+        mToolbar.setTitle(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
 
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
         String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
@@ -214,6 +226,17 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
                 mReviewLayout.addView(layout);
             }
         }
+    }
+
+    // A method to find height of the status bar
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        Log.d("Ziolle", "result = " + result);
+        return result;
     }
 
     class DownloadImageTask extends AsyncTask<String, Void, String> {
