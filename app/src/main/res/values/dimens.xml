@@ -9,6 +9,8 @@
     <dimen name="card_view_margin">2dp</dimen>
     <dimen name="card_view_width">58dp</dimen>
     <dimen name="detail_fragment_margin">16dp</dimen>
-    <dimen name="movie_poster_width">185dp</dimen>
-    <dimen name="movie_poster_height">278dp</dimen>
+    <dimen name="movie_poster_width">170dp</dimen>
+    <dimen name="movie_poster_height">265dp</dimen>
+
+    <dimen name="grid_item_elevation">4dp</dimen>
 </resources>

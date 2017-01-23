@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +77,10 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
             }
         });
+
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+
         return rootView;
     }
 
@@ -109,6 +116,7 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
             if (Utility.isConnected(getActivity())) {
                 //Get the preference's value and start the AsyncTask
                 if (lastQueryMode.equals("") || !lastQueryMode.equals(queryMode)) {
+                    mMovieItems.clear();
                     lastQueryMode = queryMode;
                     mCurrentPage = 1;
                 }
@@ -128,6 +136,9 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
     public void updateMovieList(ArrayList<MovieItem> movieList) {
         TextView emptyTextView = (TextView) getActivity().findViewById(R.id.empty_grid_view);
         if (movieList != null) {
+            if (movieList.size() == 0) {
+                emptyTextView.setText(getString(R.string.grid_view_error));
+            }
             mMovieItems.addAll(movieList);
             mMovieAdapter.notifyDataSetChanged();
         } else {
@@ -144,7 +155,20 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
                         break;
                 }
             }
+            mMovieItems.clear();
+            mMovieAdapter.notifyDataSetChanged();
         }
+    }
+
+    // A method to find height of the status bar
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        Log.d("Ziolle", "result = " + result);
+        return result;
     }
 
     /**

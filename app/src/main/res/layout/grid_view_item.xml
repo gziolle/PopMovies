@@ -1,7 +1,16 @@
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/poster"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/movie_poster_height"
-    android:layout_weight="1"
-    android:adjustViewBounds="true"
-    android:scaleType="fitStart" />
+    android:layout_height="wrap_content"
+    android:elevation="@dimen/grid_item_elevation"
+    card_view:cardCornerRadius="8dp"
+    card_view:cardPreventCornerOverlap="false">
+
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/poster"
+        android:layout_width="@dimen/movie_poster_width"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+</android.support.v7.widget.CardView>
