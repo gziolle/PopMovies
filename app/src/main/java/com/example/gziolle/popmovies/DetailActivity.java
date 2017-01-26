@@ -50,8 +50,8 @@ public class DetailActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                break;
+                startActivityForResult(intent, 1);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

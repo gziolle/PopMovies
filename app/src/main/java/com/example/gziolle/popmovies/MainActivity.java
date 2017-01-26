@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
         if (findViewById(R.id.movie_detail_container) != null) {
@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         switch (item.getItemId()) {
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                break;
+                startActivityForResult(intent, 1);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
