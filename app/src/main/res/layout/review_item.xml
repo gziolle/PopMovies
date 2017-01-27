@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:elevation="@dimen/card_view_elevation"
-        card_view:cardBackgroundColor="@color/colorPrimaryLight">
+        card_view:cardBackgroundColor="@color/white">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"

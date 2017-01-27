@@ -1,10 +1,13 @@
 package com.example.gziolle.popmovies;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -49,12 +52,13 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     ViewGroup mReviewLayout;
     Toolbar mToolbar;
     private RecyclerView.Adapter mTrailerAdapter;
-    private ImageButton mImageButton;
     private Bundle mBundle;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d("Ziolle", "onCreateView");
+
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
@@ -62,45 +66,45 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.setSupportActionBar(mToolbar);
 
-        mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Log.d("Ziolle", "portrait");
+            mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+        }
 
         activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         RecyclerView trailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailer_list);
-        trailerRecyclerView.setHasFixedSize(true);
-
         RecyclerView.LayoutManager trailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         trailerRecyclerView.setLayoutManager(trailerLayoutManager);
-
         mTrailerAdapter = new TrailerAdapter(getActivity(), mMovieTrailers, this);
         trailerRecyclerView.setAdapter(mTrailerAdapter);
 
         mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_list);
-
-        mImageButton = (ImageButton) rootView.findViewById(R.id.favorite_button);
-
-        //TODO
-        // make a query to check id the movie is already a favorite one.
-        // If so, set the ImageButton as selected.
-        mImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!mImageButton.isSelected()) {
-                    String posterUrl = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
-                    if (posterUrl != null) {
-                        new DownloadImageTask().execute(posterUrl);
-                    }
-                } else {
-                    //delete movie from the database
-                    if (Utility.deleteMovieFromDB(mBundle, getActivity())) {
-                        mImageButton.setSelected(false);
+        /*if(getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            mImageButton = (ImageButton) rootView.findViewById(R.id.favorite_button);
+            //TODO
+            // make a query to check id the movie is already a favorite one.
+            // If so, set the ImageButton as selected.
+            mImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!mImageButton.isSelected()) {
+                        String posterUrl = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+                        if (posterUrl != null) {
+                            new DownloadImageTask().execute(posterUrl);
+                        }
                     } else {
-                        Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's list", Toast.LENGTH_SHORT).show();
+                        //delete movie from the database
+                        if (Utility.deleteMovieFromDB(mBundle, getActivity())) {
+                            mImageButton.setSelected(false);
+                        } else {
+                            Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's list", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }*/
         return rootView;
     }
 
@@ -126,20 +130,23 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
     public void bindView(Bundle bundle) {
 
-        mToolbar.setTitle(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mToolbar.setTitle(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+        }
 
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
         String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
 
         if (!moviePosterPath.startsWith("/data")) {
-            moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
+            moviePosterPath = Utility.POSTER_PATH_BIG_AUTHORITY + moviePosterPath;
+            Log.d("Ziolle", "url = " + moviePosterPath);
             //Download the image using Picasso API
             Picasso.with(getActivity()).load(moviePosterPath)
-                    .error(R.mipmap.ic_launcher).fit().into(moviePoster);
+                    .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
         } else {
             File posterFile = new File(moviePosterPath);
             Picasso.with(getActivity()).load(posterFile)
-                    .error(R.mipmap.ic_launcher).fit().into(moviePoster);
+                    .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
         }
 
         TextView releaseDate = (TextView) getActivity().findViewById(R.id.release_date);
@@ -151,28 +158,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
 
         TextView overview = (TextView) getActivity().findViewById(R.id.overview);
         overview.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
-
-        ImageButton favoriteButton = (ImageButton) getActivity().findViewById(R.id.favorite_button);
-        favoriteButton.setVisibility(View.VISIBLE);
-
-        String[] projection = {FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID};
-        String[] selectionArgs = {String.valueOf(bundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID))};
-
-        String selection = FavoritesContract.FavoritesEntry.TABLE_NAME + "." + FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ?";
-
-        Cursor retCursor = getActivity().getContentResolver().query(FavoritesContract.FavoritesEntry.CONTENT_URI, projection, selection, selectionArgs, null);
-
-        try {
-            if (retCursor.moveToFirst()) {
-                favoriteButton.setSelected(true);
-            }
-        } catch (NullPointerException ex) {
-            Log.e("Ziolle", ex.getMessage());
-        } finally {
-            if (retCursor != null && !retCursor.isClosed()) {
-                retCursor.close();
-            }
-        }
 
         try {
             updateTrailerAndReviewList(bundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID));
@@ -237,39 +222,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         }
         Log.d("Ziolle", "result = " + result);
         return result;
-    }
-
-    class DownloadImageTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-
-            String imageSource = strings[0];
-            String filePath = null;
-
-            if (!imageSource.startsWith("/data")) {
-                imageSource = Utility.POSTER_PATH_AUTHORITY + imageSource;
-            }
-
-            Bitmap poster = Utility.getImageFromUrl(getActivity(), imageSource);
-            if (poster != null) {
-                filePath = Utility.savePosterIntoStorage(mBundle, getActivity(), poster);
-                Log.d("Ziolle", "posterUrl = " + filePath);
-            }
-            return filePath;
-        }
-
-        @Override
-        protected void onPostExecute(String filePath) {
-            super.onPostExecute(filePath);
-            if (filePath != null) {
-                mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
-            }
-            if (Utility.insertMovieIntoDB(mBundle, getActivity())) {
-                mImageButton.setSelected(true);
-            } else {
-                Toast.makeText(getActivity(), "Couldn't save this movie as a favorite", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 }
 

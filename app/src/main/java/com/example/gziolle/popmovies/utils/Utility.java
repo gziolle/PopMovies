@@ -30,7 +30,8 @@ import java.net.URL;
 public class Utility {
 
     public static final String TMDB_AUTHORITY = "api.themoviedb.org";
-    public static final String POSTER_PATH_AUTHORITY = "http://image.tmdb.org/t/p/w185";
+    public static final String POSTER_PATH_AUTHORITY = "http://image.tmdb.org/t/p/w342";
+    public static final String POSTER_PATH_BIG_AUTHORITY = "http://image.tmdb.org/t/p/w500";
     public static final String TMDB_API_VERSION = "3";
     public static final String TMDB_MOVIE_DIR = "movie";
     public static final String TMDB_MOVIE_VIDEOS = "videos";

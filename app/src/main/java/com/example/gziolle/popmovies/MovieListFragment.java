@@ -78,9 +78,6 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
             }
         });
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
-
         return rootView;
     }
 

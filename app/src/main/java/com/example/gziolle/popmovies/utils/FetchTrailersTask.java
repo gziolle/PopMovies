@@ -47,7 +47,7 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<Trailer
         mProgressDialog = new ProgressDialog(mContext);
         mProgressDialog.setMessage(mContext.getString(R.string.progress_message));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCancelable(true);
         mProgressDialog.show();
     }
 

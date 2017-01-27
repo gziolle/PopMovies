@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/light_orange">
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -29,8 +28,8 @@
                 <ImageView
                     android:id="@+id/movie_image"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:scaleType="centerInside"
+                    android:layout_height="@dimen/detail_poster_appbar_height"
+                    android:scaleType="centerCrop"
                     app:layout_collapseMode="parallax" />
 
                 <View
@@ -44,8 +43,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="80dp"
                     android:paddingTop="24dp"
-                    app:layout_collapseMode="pin"
-                    tools:text="teste" />
+                    app:layout_collapseMode="pin" />
 
             </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -64,19 +62,6 @@
                 <include layout="@layout/detail_info_grid" />
 
                 <TextView
-                    android:id="@+id/overview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:fontFamily="sans-serif-light"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    android:textColor="@color/black"
-                    tools:text="overview" />
-
-                <TextView
                     android:id="@+id/trailers_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -90,7 +75,8 @@
                     android:id="@+id/trailer_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none" />
+                    android:scrollbars="none"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
                 <LinearLayout
                     android:id="@+id/review_list"

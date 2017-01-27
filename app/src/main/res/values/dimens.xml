@@ -13,4 +13,7 @@
     <dimen name="movie_poster_height">265dp</dimen>
 
     <dimen name="grid_item_elevation">4dp</dimen>
+
+    <dimen name="detail_poster_width">250dp</dimen>
+    <dimen name="detail_poster_appbar_height">250dp</dimen>
 </resources>

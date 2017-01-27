@@ -1,112 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey"
-    android:orientation="vertical">
+    android:background="@color/light_orange"
+    android:orientation="horizontal">
 
-    <ScrollView
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/movie_image"
+            android:layout_width="@dimen/detail_poster_width"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="@dimen/detail_poster_width"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="24dp"
+            app:popupTheme="@style/Theme.AppCompat.Light"
+            app:theme="@style/TransparentToolbarStyle" />
+
+    </FrameLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:paddingLeft="@dimen/detail_fragment_margin"
-                android:paddingRight="@dimen/detail_fragment_margin"
-                android:paddingStart="@dimen/detail_fragment_margin"
-                android:textColor="@color/white"
-                android:textSize="@dimen/title_size" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingLeft="@dimen/detail_fragment_margin"
-                android:paddingRight="@dimen/detail_fragment_margin"
-                android:paddingTop="@dimen/activity_vertical_margin">
-
-                <ImageView
-                    android:id="@+id/movie_image"
-                    android:layout_width="185dp"
-                    android:layout_height="277dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    android:paddingStart="@dimen/activity_horizontal_margin">
-
-                    <TextView
-                        android:id="@+id/release_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-light"
-                        android:textAppearance="?android:textAppearanceSmall"
-                        android:textColor="@color/white" />
-
-                    <TextView
-                        android:id="@+id/average"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-light"
-                        android:textAppearance="?android:textAppearanceSmall"
-                        android:textColor="@color/white" />
-
-                    <ImageButton
-                        android:id="@+id/favorite_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/favorite_button_selector"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/overview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:fontFamily="sans-serif-light"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:textColor="@color/white" />
+            <include layout="@layout/detail_info_grid" />
 
             <TextView
                 android:id="@+id/trailers_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:paddingLeft="@dimen/detail_fragment_margin"
-                android:paddingStart="@dimen/detail_fragment_margin"
+                android:paddingLeft="16dp"
+                android:paddingStart="16dp"
                 android:text="@string/trailers"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/trailer_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none" />
+                android:scrollbars="none"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
             <LinearLayout
                 android:id="@+id/review_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/detail_fragment_margin"
+                android:layout_margin="@dimen/activity_horizontal_margin"
                 android:orientation="vertical">
 
                 <TextView
@@ -115,10 +69,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/reviews"
-                    android:textColor="@color/white"
+                    android:textColor="@color/black"
                     android:visibility="gone" />
-
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 </LinearLayout>

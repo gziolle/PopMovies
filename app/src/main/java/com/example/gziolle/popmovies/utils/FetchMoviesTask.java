@@ -34,6 +34,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
 
     private static final String RESULTS = "results";
     private static final String RESULT_CODE = "status_code";
+
     public static int ROW_ID = 0;
     public static int MOVIE_ID = 1;
     public static int MOVIE_TITLE = 2;
@@ -56,7 +57,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
         mProgressDialog = new ProgressDialog(mContext);
         mProgressDialog.setMessage(mContext.getString(R.string.progress_message));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setCancelable(true);
+        mProgressDialog.setCancelable(false);
         mProgressDialog.show();
     }
 

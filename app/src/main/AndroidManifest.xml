@@ -32,7 +32,12 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings"
-            android:theme="@style/SettingsTheme" />
+            android:theme="@style/SettingsTheme">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.gziolle.popmovies.MainActivity" />
+        </activity>
 
         <provider
             android:name=".data.FavoritesProvider"
