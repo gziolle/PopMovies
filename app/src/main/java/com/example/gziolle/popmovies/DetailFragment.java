@@ -42,7 +42,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     public static final String LOG_TAG = DetailFragment.class.getSimpleName();
     static final String DETAIL_FRAGMENT_TAG = "DFTAG";
 
-    public ArrayList<TrailerItem> mMovieTrailers = new ArrayList<>();
+    public static ArrayList<TrailerItem> mMovieTrailers = new ArrayList<>();
     ViewGroup mReviewLayout;
     Toolbar mToolbar;
     private RecyclerView.Adapter mTrailerAdapter;

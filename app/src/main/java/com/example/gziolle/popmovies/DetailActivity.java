@@ -107,7 +107,8 @@ public class DetailActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String test = "Share this!";
                 Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_TEXT, test);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, DetailFragment.mMovieTrailers.get(0).browserUrl);
                 Intent chooserIntent = Intent.createChooser(intent, test);
                 startActivity(chooserIntent);
             }

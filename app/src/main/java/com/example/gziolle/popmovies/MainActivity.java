@@ -211,4 +211,14 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         MovieListFragment movieListFragment = (MovieListFragment) fm.findFragmentById(R.id.movie_list_fragment);
         movieListFragment.queryMovies();
     }
+
+    private void setDrawerCheckedItem(String queryMode) {
+        if (queryMode.equals(getString(R.string.query_mode_popular))) {
+            mDrawer.setCheckedItem(R.id.popular);
+        } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
+            mDrawer.setCheckedItem(R.id.top_rated);
+        } else {
+            mDrawer.setCheckedItem(R.id.favorites);
+        }
+    }
 }
