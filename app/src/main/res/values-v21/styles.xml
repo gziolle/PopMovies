@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -9,7 +8,6 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="toolbarStyle">@style/ToolbarStyle</item>
     </style>
-
 
     <!-- Settings activity theme. -->
     <style name="SettingsTheme" parent="@android:style/Theme.Material.Light.DarkActionBar">
@@ -45,6 +43,11 @@
     <style name="CollapsedToolbarTextStyle">
         <item name="android:textColor">@color/white</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="dialog_style">
+        <item name="android:backgroundTint">@color/colorPrimaryDark</item>
+        <item name="android:colorPrimary">@color/colorPrimaryDark</item>
     </style>
 
 </resources>

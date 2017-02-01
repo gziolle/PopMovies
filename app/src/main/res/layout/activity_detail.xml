@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/white"
             fab:fab_colorPressed="@color/white"
+            fab:fab_icon="@drawable/ic_favorite"
             fab:fab_size="mini"
             fab:fab_title="@string/add_favorite" />
 
@@ -39,6 +40,7 @@
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/white"
             fab:fab_colorPressed="@color/white"
+            fab:fab_icon="@drawable/ic_share"
             fab:fab_size="mini"
             fab:fab_title="@string/share" />
     </com.getbase.floatingactionbutton.FloatingActionsMenu>

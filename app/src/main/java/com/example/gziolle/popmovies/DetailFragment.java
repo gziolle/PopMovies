@@ -1,20 +1,16 @@
 package com.example.gziolle.popmovies;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +18,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,7 +32,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
 
 /**
  * Created by gziolle on 10/19/2016.
@@ -52,7 +46,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     ViewGroup mReviewLayout;
     Toolbar mToolbar;
     private RecyclerView.Adapter mTrailerAdapter;
-    private Bundle mBundle;
 
     @Nullable
     @Override
@@ -71,8 +64,12 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
         }
 
-        activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar bar = activity.getSupportActionBar();
+
+        if (bar != null) {
+            bar.setDisplayShowTitleEnabled(false);
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         RecyclerView trailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailer_list);
         RecyclerView.LayoutManager trailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
@@ -81,30 +78,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         trailerRecyclerView.setAdapter(mTrailerAdapter);
 
         mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_list);
-        /*if(getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-            mImageButton = (ImageButton) rootView.findViewById(R.id.favorite_button);
-            //TODO
-            // make a query to check id the movie is already a favorite one.
-            // If so, set the ImageButton as selected.
-            mImageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!mImageButton.isSelected()) {
-                        String posterUrl = mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
-                        if (posterUrl != null) {
-                            new DownloadImageTask().execute(posterUrl);
-                        }
-                    } else {
-                        //delete movie from the database
-                        if (Utility.deleteMovieFromDB(mBundle, getActivity())) {
-                            mImageButton.setSelected(false);
-                        } else {
-                            Toast.makeText(getActivity(), "Couldn't delete this movie from the favorite's list", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
-        }*/
         return rootView;
     }
 
@@ -113,8 +86,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         super.onActivityCreated(savedInstanceState);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            mBundle = bundle;
-            bindView(mBundle);
+            bindView(bundle);
         }
     }
 
@@ -137,16 +109,18 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
         String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
 
-        if (!moviePosterPath.startsWith("/data")) {
-            moviePosterPath = Utility.POSTER_PATH_BIG_AUTHORITY + moviePosterPath;
-            Log.d("Ziolle", "url = " + moviePosterPath);
-            //Download the image using Picasso API
-            Picasso.with(getActivity()).load(moviePosterPath)
-                    .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
-        } else {
-            File posterFile = new File(moviePosterPath);
-            Picasso.with(getActivity()).load(posterFile)
-                    .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
+        if (moviePosterPath != null) {
+            if (!moviePosterPath.startsWith("/data")) {
+                moviePosterPath = Utility.POSTER_PATH_BIG_AUTHORITY + moviePosterPath;
+                Log.d("Ziolle", "url = " + moviePosterPath);
+                //Download the image using Picasso API
+                Picasso.with(getActivity()).load(moviePosterPath)
+                        .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
+            } else {
+                File posterFile = new File(moviePosterPath);
+                Picasso.with(getActivity()).load(posterFile)
+                        .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
+            }
         }
 
         TextView releaseDate = (TextView) getActivity().findViewById(R.id.release_date);

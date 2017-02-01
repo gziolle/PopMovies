@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,11 +15,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.gziolle.popmovies.utils.FetchMoviesTask;
 import com.example.gziolle.popmovies.utils.Utility;
+
 import java.util.ArrayList;
 
 
@@ -69,10 +74,11 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
                     int currentItem = firstVisibleItem + visibleItemCount;
                     if (Utility.isConnected(getActivity()) && currentItem == totalItemCount && !mIsFetching) {
                         mCurrentPage++;
-                        updateMovieList();
+                        queryMovies();
                     }
                 }
             }
+
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
             }
@@ -92,12 +98,19 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
     @Override
     public void onStart() {
         super.onStart();
-        if (!mIsFetching) {
-            updateMovieList();
+        if (Utility.isConnected(getActivity()) && !mIsFetching) {
+            queryMovies();
+        } else {
+            //Since there is no connection, we'll clear the data source and notify that it has changed.
+            mMovieItems.clear();
+            mMovieAdapter.notifyDataSetChanged();
+
+            TextView mEmptyView = (TextView) getActivity().findViewById(R.id.empty_grid_view);
+            mEmptyView.setText(R.string.grid_view_error_no_connection);
         }
     }
 
-    public void updateMovieList() {
+    public void queryMovies() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String queryMode = prefs.getString(getString(R.string.query_mode_key), getString(R.string.query_mode_default));
 
@@ -155,17 +168,6 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
             mMovieItems.clear();
             mMovieAdapter.notifyDataSetChanged();
         }
-    }
-
-    // A method to find height of the status bar
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        Log.d("Ziolle", "result = " + result);
-        return result;
     }
 
     /**

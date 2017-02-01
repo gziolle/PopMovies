@@ -1,20 +1,28 @@
 <resources>
     <string name="app_name">PopMovies</string>
-    <string name="settings">Settings</string>
     <string name="query_mode_label">Search Mode</string>
-    <string name="query_mode_default">popular</string>
+    <string name="query_mode_default" translatable="false">popular</string>
     <string name="query_mode_key" translatable="false">query_mode</string>
     <string name="trailer">Trailer</string>
     <string name="trailers">Trailers</string>
     <string name="reviews">Reviews</string>
     <string name="progress_message">Please wait&#8230;</string>
-    <string name="query_mode_favorites">favorites</string>
     <string name="no_favorites">No favorites!</string>
     <string name="by_author">By: %1$s</string>
     <string name="average_note">%.1f / 10</string>
     <string name="grid_view_error">There are no movies to display. Please, change the query mode in Settings.</string>
     <string name="grid_view_error_no_connection">There is no internet connection. You can check you favorites collection, though.</string>
     <string name="grid_view_error_needs_api_key">There are no movies to display. Please, check for an updated version of PopMovies.</string>
+
+    <string name="popular">Popular</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="favorites">Favorites</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+
+    <string name="query_mode_popular" translatable="false">popular</string>
+    <string name="query_mode_top_rated" translatable="false">top_rated</string>
+    <string name="query_mode_favorites" translatable="false">favorites</string>
 
     <string name="release_date">Release Date: </string>
     <string name="average">Average: </string>
@@ -23,8 +31,17 @@
     <string name="share">Share</string>
     <string name="remove_favorite">Remove from favorites</string>
 
-
     <string name="pref_status" translatable="false">pref_status</string>
+
+    <string name="copyright" translatable="false">©gziolle, 2017</string>
+
+    <string name="third_parties" translatable="false">Third Parties:</string>
+
+    <string name="picasso_link" translatable="false"><a href="http://square.github.io/picasso/">Picasso</a></string>
+    <string name="fab_link" translatable="false"><a href="https://github.com/futuresimple/android-floating-action-button">Floating Action Button</a></string>
+    <string name="the_movie_db_link" translatable="false"><a href="https://www.themoviedb.org/documentation/api">The Movie DB</a></string>
+
+    <string name="back">Back</string>
 
     <string-array name="query_mode_options">
         <item>Popular</item>

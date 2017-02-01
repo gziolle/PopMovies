@@ -1,6 +1,7 @@
 package com.example.gziolle.popmovies;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
     private ArrayList<MovieItem> movieList;
 
 
-    public MovieAdapter(Context context, int resource, ArrayList<MovieItem> objects) {
+    MovieAdapter(Context context, int resource, ArrayList<MovieItem> objects) {
         super(context, resource, objects);
         this.mContext = context;
         this.movieList = objects;
@@ -41,7 +42,7 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(int position, View convertView, @NonNull ViewGroup viewGroup) {
 
         MovieItem movieItem = getItem(position);
 
@@ -52,17 +53,18 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
         ImageView imageView = (ImageView) convertView.findViewById(R.id.poster);
 
         String moviePosterPath = movieItem.getPosterPath();
-        if (!moviePosterPath.startsWith("/data")) {
-            moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
-            //Download the image using Picasso API
-            Picasso.with(mContext).load(moviePosterPath)
-                    .error(R.mipmap.ic_launcher).into(imageView);
-        } else {
-            File posterFile = new File(moviePosterPath);
-            Picasso.with(mContext).load(posterFile)
-                    .error(R.mipmap.ic_launcher).into(imageView);
+        if (moviePosterPath != null) {
+            if (!moviePosterPath.startsWith("/data")) {
+                moviePosterPath = Utility.POSTER_PATH_AUTHORITY + moviePosterPath;
+                //Download the image using Picasso API
+                Picasso.with(mContext).load(moviePosterPath)
+                        .error(R.mipmap.ic_launcher).into(imageView);
+            } else {
+                File posterFile = new File(moviePosterPath);
+                Picasso.with(mContext).load(posterFile)
+                        .error(R.mipmap.ic_launcher).into(imageView);
+            }
         }
-
         imageView.setAdjustViewBounds(true);
         return convertView;
     }

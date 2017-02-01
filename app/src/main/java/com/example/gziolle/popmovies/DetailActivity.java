@@ -75,6 +75,9 @@ public class DetailActivity extends AppCompatActivity {
             isFavorite = false;
             favoriteFloatingActionButton.setTitle(getString(R.string.add_favorite));
         }
+        if (retCursor != null && !retCursor.isClosed()) {
+            retCursor.close();
+        }
 
         favoriteFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +117,6 @@ public class DetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.detail, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -134,7 +136,7 @@ public class DetailActivity extends AppCompatActivity {
 
         private Context mContext;
 
-        public DownloadImageTask(Context context) {
+        DownloadImageTask(Context context) {
             this.mContext = context;
         }
 

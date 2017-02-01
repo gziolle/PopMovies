@@ -15,5 +15,6 @@
     <color name="very_dark_grey">#111111</color>
 
     <color name="black_semi_transparent">#B2000000</color>
+    <color name="off_white">#EEEEEE</color>
 
 </resources>

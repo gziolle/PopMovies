@@ -1,18 +1,32 @@
 package com.example.gziolle.popmovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.gziolle.popmovies.data.FavoritesContract;
 
 public class MainActivity extends AppCompatActivity implements MovieListFragment.Callback {
 
     private static boolean mTwoPane;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mDrawer;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +45,73 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         } else {
             mTwoPane = false;
         }
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawer = (NavigationView) findViewById(R.id.navigation_drawer_list);
+
+        setupDrawerContent();
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.add_favorite, R.string.add_favorite);
+        mDrawerToggle.setDrawerIndicatorEnabled(false);
+        Drawable menuIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_menu, getTheme());
+        mDrawerToggle.setHomeAsUpIndicator(menuIcon);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+        mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String queryMode = prefs.getString(getString(R.string.query_mode_key), "");
+        String titleString;
+
+        if (queryMode.equals("")) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(getString(R.string.query_mode_key), getString(R.string.query_mode_favorites));
+            editor.commit();
+            titleString = getString(R.string.favorites);
+        } else {
+            if (queryMode.equals(getString(R.string.query_mode_popular))) {
+                mDrawer.setCheckedItem(R.id.popular);
+                titleString = getString(R.string.popular);
+            } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
+                titleString = getString(R.string.top_rated);
+                mDrawer.setCheckedItem(R.id.top_rated);
+            } else {
+                titleString = getString(R.string.favorites);
+                mDrawer.setCheckedItem(R.id.favorites);
+            }
+        }
+
+        getSupportActionBar().setTitle(titleString);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String queryMode = prefs.getString(getString(R.string.query_mode_key), "");
+
+        if (queryMode.equals(getString(R.string.query_mode_popular))) {
+            mDrawer.setCheckedItem(R.id.popular);
+        } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
+            mDrawer.setCheckedItem(R.id.top_rated);
+        } else {
+            mDrawer.setCheckedItem(R.id.favorites);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
 
     }
@@ -80,4 +156,59 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         }
     }
 
+    private void setupDrawerContent() {
+        mDrawer.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        selectMenuItem(item);
+                        return true;
+                    }
+                }
+        );
+    }
+
+    private void selectMenuItem(MenuItem item) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        String queryMode;
+        String titleString;
+
+        switch (item.getItemId()) {
+            case R.id.popular:
+                queryMode = getString(R.string.query_mode_popular);
+                titleString = getString(R.string.popular);
+                break;
+            case R.id.top_rated:
+                queryMode = getString(R.string.query_mode_top_rated);
+                titleString = getString(R.string.top_rated);
+                break;
+            case R.id.settings:
+                item.setChecked(false);
+                mDrawerLayout.closeDrawers();
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(intent, 1);
+                return;
+            case R.id.about:
+                DialogFragment newFragment = new AboutDialogFragment();
+                newFragment.show(getSupportFragmentManager(), "about");
+                return;
+            default:
+                queryMode = getString(R.string.query_mode_favorites);
+                titleString = getString(R.string.favorites);
+                break;
+        }
+
+        editor.putString(getString(R.string.query_mode_key), queryMode);
+        editor.commit();
+
+        item.setChecked(true);
+        mDrawerLayout.closeDrawers();
+        getSupportActionBar().setTitle(titleString);
+
+        FragmentManager fm = getSupportFragmentManager();
+        MovieListFragment movieListFragment = (MovieListFragment) fm.findFragmentById(R.id.movie_list_fragment);
+        movieListFragment.queryMovies();
+    }
 }
