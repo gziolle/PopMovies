@@ -103,13 +103,12 @@ public class DetailActivity extends AppCompatActivity {
         shareFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String shareText = String.format(getString(R.string.share_text), mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE)) + DetailFragment.mMovieTrailers.get(0).browserUrl;
+                actionsMenu.collapse();
 
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
+                String shareText = String.format(getString(R.string.share_text), mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE)) + DetailFragment.mMovieTrailers.get(0).browserUrl;
+                Intent intent = new Intent(Intent.ACTION_SEND).setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, shareText);
-                Intent chooserIntent = Intent.createChooser(intent, getString(R.string.share));
-                startActivity(chooserIntent);
+                startActivity(Intent.createChooser(intent, getString(R.string.share)));
             }
         });
 
