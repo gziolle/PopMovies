@@ -26,8 +26,8 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 public class DetailActivity extends AppCompatActivity {
 
     public static Bundle mBundle;
-    static Context mContext;
     private static boolean isFavorite = false;
+    Context mContext;
     FloatingActionButton shareFloatingActionButton;
     FloatingActionButton favoriteFloatingActionButton;
     FloatingActionsMenu actionsMenu;
@@ -105,11 +105,12 @@ public class DetailActivity extends AppCompatActivity {
         shareFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String test = "Share this!";
+                String shareText = String.format(getString(R.string.share_text), mBundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE)) + DetailFragment.mMovieTrailers.get(0).browserUrl;
+
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, DetailFragment.mMovieTrailers.get(0).browserUrl);
-                Intent chooserIntent = Intent.createChooser(intent, test);
+                intent.putExtra(Intent.EXTRA_TEXT, shareText);
+                Intent chooserIntent = Intent.createChooser(intent, getString(R.string.share));
                 startActivity(chooserIntent);
             }
         });

@@ -43,6 +43,8 @@
 
     <string name="back">Back</string>
 
+    <string name="share_text">Watch a trailer for %1$s: </string>
+
     <string-array name="query_mode_options">
         <item>Popular</item>
         <item>Highest Rated</item>
