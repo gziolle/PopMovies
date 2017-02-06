@@ -159,6 +159,10 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             TextView trailerListTitle = (TextView) getActivity().findViewById(R.id.trailers_title);
             trailerListTitle.setVisibility(View.VISIBLE);
         }
+
+        if (mMovieTrailers.size() != 0) {
+            mMovieTrailers.clear();
+        }
         mMovieTrailers.addAll(trailers);
         mTrailerAdapter.notifyDataSetChanged();
     }

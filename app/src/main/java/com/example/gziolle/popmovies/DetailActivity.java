@@ -32,8 +32,6 @@ public class DetailActivity extends AppCompatActivity {
     FloatingActionButton favoriteFloatingActionButton;
     FloatingActionsMenu actionsMenu;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mContext = this;
