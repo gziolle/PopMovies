@@ -14,7 +14,8 @@
             android:id="@+id/movie_image"
             android:layout_width="@dimen/detail_poster_width"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:transitionName="@string/transition_poster" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -27,8 +28,10 @@
     </FrameLayout>
 
     <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="invisible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout

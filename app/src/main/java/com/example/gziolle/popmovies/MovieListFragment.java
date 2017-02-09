@@ -62,8 +62,12 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Log.d("Ziolle", "position = " + position);
+
                 MovieItem item = mMovieAdapter.getItem(position);
-                ((Callback) getActivity()).onItemSelected(item);
+
+                Log.d("Ziolle", "item title: " + item.getTitle());
+                ((Callback) getActivity()).onItemSelected(item, view);
             }
         });
 
@@ -179,6 +183,6 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        void onItemSelected(MovieItem item);
+        void onItemSelected(MovieItem item, View view);
     }
 }

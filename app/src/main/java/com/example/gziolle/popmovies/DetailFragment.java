@@ -1,23 +1,38 @@
 package com.example.gziolle.popmovies;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
+import android.transition.Transition;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,9 +65,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("Ziolle", "onCreateView");
-
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
@@ -60,7 +73,6 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         activity.setSupportActionBar(mToolbar);
 
         if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.d("Ziolle", "portrait");
             mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
         }
 
@@ -77,7 +89,56 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         mTrailerAdapter = new TrailerAdapter(getActivity(), mMovieTrailers, this);
         trailerRecyclerView.setAdapter(mTrailerAdapter);
 
+        trailerRecyclerView.setNestedScrollingEnabled(false);
+
+
+
         mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_list);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            getActivity().getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        final View gradientView = rootView.findViewById(R.id.gradient_view);
+
+                        ObjectAnimator gradientViewAnim = ObjectAnimator.ofFloat(gradientView, "alpha", 0f, 1f);
+                        gradientViewAnim.setInterpolator(new DecelerateInterpolator());
+                        gradientView.setVisibility(View.VISIBLE);
+
+                        ObjectAnimator toolbarAnim = ObjectAnimator.ofFloat(mToolbar, "alpha", 0f, 1f);
+                        toolbarAnim.setInterpolator(new DecelerateInterpolator());
+                        mToolbar.setVisibility(View.VISIBLE);
+
+                        AnimatorSet animatorSet = new AnimatorSet();
+                        animatorSet.playTogether(gradientViewAnim, toolbarAnim);
+                        animatorSet.start();
+                    }
+                }
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+
+                }
+            });
+
+        }
+
         return rootView;
     }
 
@@ -88,6 +149,17 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         if (bundle != null) {
             bindView(bundle);
         }
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     private void updateTrailerAndReviewList(Long id) {
@@ -107,7 +179,10 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         }
 
         ImageView moviePoster = (ImageView) getActivity().findViewById(R.id.movie_image);
-        String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
+        Bitmap bitmap = bundle.getParcelable("bitmap");
+
+        moviePoster.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
+        /*String moviePosterPath = bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH);
 
         if (moviePosterPath != null) {
             if (!moviePosterPath.startsWith("/data")) {
@@ -121,7 +196,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
                 Picasso.with(getActivity()).load(posterFile)
                         .error(R.mipmap.ic_launcher).resize(500, 750).centerCrop().into(moviePoster);
             }
-        }
+        }*/
 
         TextView releaseDate = (TextView) getActivity().findViewById(R.id.release_date);
         releaseDate.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
@@ -201,5 +276,7 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
         Log.d("Ziolle", "result = " + result);
         return result;
     }
+
+
 }
 

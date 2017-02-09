@@ -44,11 +44,11 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<Trailer
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mProgressDialog = new ProgressDialog(mContext);
+        /*mProgressDialog = new ProgressDialog(mContext);
         mProgressDialog.setMessage(mContext.getString(R.string.progress_message));
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setCancelable(true);
-        mProgressDialog.show();
+        mProgressDialog.show();*/
     }
 
     @Override
@@ -127,7 +127,7 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<Trailer
     @Override
     protected void onPostExecute(ArrayList<TrailerItem> trailerList) {
         super.onPostExecute(trailerList);
-        mProgressDialog.dismiss();
+//        mProgressDialog.dismiss();
         if (trailerList != null) {
             response.updateTrailers(trailerList);
         }

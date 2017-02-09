@@ -45,6 +45,8 @@
 
     <string name="share_text">Watch a trailer for %1$s: </string>
 
+    <string name="transition_poster" translatable="false">translation_poster</string>
+
     <string-array name="query_mode_options">
         <item>Popular</item>
         <item>Highest Rated</item>

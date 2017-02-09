@@ -1,16 +1,29 @@
 package com.example.gziolle.popmovies;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.example.gziolle.popmovies.utils.Utility;
@@ -49,6 +62,11 @@ public class DetailActivity extends AppCompatActivity {
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
             mBundle.putDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, intent.getDoubleExtra(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, 0));
+
+            byte[] bitmapArray = intent.getByteArrayExtra("bitmap");
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapArray, 0, bitmapArray.length);
+
+            mBundle.putParcelable("bitmap", bitmap);
         }
 
         if (savedInstanceState == null) {
@@ -111,7 +129,6 @@ public class DetailActivity extends AppCompatActivity {
                 startActivity(Intent.createChooser(intent, getString(R.string.share)));
             }
         });
-
     }
 
     @Override
@@ -129,6 +146,16 @@ public class DetailActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if (hasFocus) {
+            NestedScrollView nestedScrollView = (NestedScrollView) findViewById(R.id.nested_scroll_view);
+            Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+            nestedScrollView.startAnimation(bottomUp);
+            nestedScrollView.setVisibility(View.VISIBLE);
+        }
     }
 
     class DownloadImageTask extends AsyncTask<String, Void, String> {

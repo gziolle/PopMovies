@@ -2,13 +2,17 @@ package com.example.gziolle.popmovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -18,8 +22,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.example.gziolle.popmovies.data.FavoritesContract;
+
+import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends AppCompatActivity implements MovieListFragment.Callback {
 
@@ -129,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
     }
 
     @Override
-    public void onItemSelected(MovieItem item) {
+    public void onItemSelected(MovieItem item, View view) {
         if (mTwoPane) {
             Bundle args = new Bundle();
             args.putLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, item.get_id());
@@ -145,6 +152,14 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
             getSupportFragmentManager().beginTransaction().replace(R.id.movie_detail_container, df, DetailFragment.DETAIL_FRAGMENT_TAG).commit();
 
         } else {
+            ImageView imageView = (ImageView) view.findViewById(R.id.poster);
+            Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this, new Pair<View, String>(imageView, getString(R.string.transition_poster))).toBundle();
+            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            byte[] bitmapArray = outputStream.toByteArray();
+
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, item.get_id());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_TITLE, item.getTitle());
@@ -152,7 +167,9 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, item.getReleaseDate());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, item.getOverview());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, item.getAverage());
-            startActivity(intent);
+            intent.putExtra("bitmap", bitmapArray);
+
+            startActivity(intent, bundle);
         }
     }
 

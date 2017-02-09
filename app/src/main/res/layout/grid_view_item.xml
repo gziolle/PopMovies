@@ -11,6 +11,7 @@
         android:layout_width="@dimen/movie_poster_width"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:transitionName="@string/transition_poster" />
 
 </android.support.v7.widget.CardView>
