@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by gziolle on 1/17/2017.
@@ -38,10 +39,12 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
     public static int ROW_ID = 0;
     public static int MOVIE_ID = 1;
     public static int MOVIE_TITLE = 2;
-    public static int MOVIE_POSTER_PATH = 3;
-    public static int MOVIE_OVERVIEW = 4;
-    public static int MOVIE_AVERAGE = 5;
-    public static int MOVIE_RELEASE_DATE = 6;
+    public static int MOVIE_ORIGINAL_TITLE = 3;
+    public static int MOVIE_POSTER_PATH = 4;
+    public static int MOVIE_OVERVIEW = 5;
+    public static int MOVIE_AVERAGE = 6;
+    public static int MOVIE_RELEASE_DATE = 7;
+
     ProgressDialog mProgressDialog;
     private Context mContext = null;
     private AsyncResponse response = null;
@@ -90,7 +93,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
                 builder.authority(Utility.TMDB_AUTHORITY);
                 builder.appendPath(Utility.TMDB_API_VERSION).appendPath(Utility.TMDB_MOVIE_DIR).appendPath(queryMode);
                 builder.appendQueryParameter(Utility.TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
-                builder.appendQueryParameter(Utility.TMDB_LANGUAGE, "en-us");
+                builder.appendQueryParameter(Utility.TMDB_LANGUAGE, Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry());
                 builder.appendQueryParameter(Utility.TMDB_PAGE, currentPage);
 
                 URL queryUrl = new URL(builder.build().toString());
@@ -179,9 +182,13 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
         for (int i = 0; i < moviesArray.length(); i++) {
             JSONObject movie = moviesArray.getJSONObject(i);
             //long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate
-            MovieItem item = new MovieItem(movie.getLong(Utility.TMDB_ID), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE),
-                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW),
-                    movie.getDouble(Utility.VOTE_AVERAGE), movie.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+            MovieItem item = new MovieItem(movie.getLong(Utility.TMDB_ID),
+                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE),
+                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE),
+                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH),
+                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW),
+                    movie.getDouble(Utility.VOTE_AVERAGE),
+                    movie.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
             movieItems.add(item);
         }
         return movieItems;
@@ -193,6 +200,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
         String[] projection = {FavoritesContract.FavoritesEntry._ID,
                 FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID,
                 FavoritesContract.FavoritesEntry.COLUMN_TITLE,
+                FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE,
                 FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH,
                 FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW,
                 FavoritesContract.FavoritesEntry.COLUMN_AVERAGE,
@@ -205,6 +213,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieItem
             while (favoriteMovies.moveToNext()) {
                 MovieItem item = new MovieItem(favoriteMovies.getInt(MOVIE_ID),
                         favoriteMovies.getString(MOVIE_TITLE),
+                        favoriteMovies.getString(MOVIE_ORIGINAL_TITLE),
                         favoriteMovies.getString(MOVIE_POSTER_PATH),
                         favoriteMovies.getString(MOVIE_OVERVIEW),
                         favoriteMovies.getDouble(MOVIE_AVERAGE),

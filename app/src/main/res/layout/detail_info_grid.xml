@@ -21,13 +21,14 @@
         android:paddingTop="@dimen/abc_list_item_padding_horizontal_material">
 
         <TextView
-            android:id="@+id/original_name"
+            android:id="@+id/original_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/black"
+            android:textStyle="italic"
             tools:text="Saving Private Ryan" />
 
         <LinearLayout

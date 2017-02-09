@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
             Bundle args = new Bundle();
             args.putLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, item.get_id());
             args.putString(FavoritesContract.FavoritesEntry.COLUMN_TITLE, item.getTitle());
+            args.putString(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE, item.getOriginalTitle());
             args.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, item.getPosterPath());
             args.putString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, item.getReleaseDate());
             args.putString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, item.getOverview());
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, item.get_id());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_TITLE, item.getTitle());
+            intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE, item.getOriginalTitle());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, item.getPosterPath());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, item.getReleaseDate());
             intent.putExtra(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, item.getOverview());

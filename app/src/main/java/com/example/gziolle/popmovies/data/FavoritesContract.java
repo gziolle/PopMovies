@@ -22,6 +22,7 @@ public class FavoritesContract {
         public static final String TABLE_NAME = "favorites";
         public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_ORIGINAL_MOVIE_TITLE = "original_title";
         public static final String COLUMN_POSTER_PATH = "poster_path";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_AVERAGE = "avg";

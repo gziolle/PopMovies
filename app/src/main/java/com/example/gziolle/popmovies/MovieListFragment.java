@@ -102,7 +102,7 @@ public class MovieListFragment extends Fragment implements FetchMoviesTask.Async
     @Override
     public void onStart() {
         super.onStart();
-        if (Utility.isConnected(getActivity()) && !mIsFetching) {
+        if (!mIsFetching) {
             queryMovies();
         } else {
             //Since there is no connection, we'll clear the data source and notify that it has changed.

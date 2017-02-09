@@ -58,6 +58,7 @@ public class DetailActivity extends AppCompatActivity {
         if (intent != null) {
             mBundle.putLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, intent.getLongExtra(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, 0));
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_TITLE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+            mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE));
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH));
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
             mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, intent.getStringExtra(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
@@ -102,11 +103,11 @@ public class DetailActivity extends AppCompatActivity {
                 if (isFavorite) {
                     //delete movie from the database
                     if (Utility.deleteMovieFromDB(mBundle, mContext)) {
-                        Toast.makeText(mContext, "Removed from favorites list", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.remove_from_favorites), Toast.LENGTH_SHORT).show();
                         isFavorite = false;
                         favoriteFloatingActionButton.setTitle(getString(R.string.add_favorite));
                     } else {
-                        Toast.makeText(mContext, "Couldn't delete this movie from the favorite's list", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.delete_movie_error), Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
@@ -191,11 +192,11 @@ public class DetailActivity extends AppCompatActivity {
                 mBundle.putString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, filePath);
             }
             if (Utility.insertMovieIntoDB(mBundle, mContext)) {
-                Toast.makeText(mContext, "Movie added as a favorite", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, getString(R.string.added_as_favorite), Toast.LENGTH_SHORT).show();
                 isFavorite = true;
                 favoriteFloatingActionButton.setTitle(getString(R.string.remove_favorite));
             } else {
-                Toast.makeText(mContext, "Couldn't save this movie as a favorite", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, getString(R.string.save_movie_error), Toast.LENGTH_SHORT).show();
             }
         }
     }

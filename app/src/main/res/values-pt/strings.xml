@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PopMovies</string>
+    <string name="top_rated">Melhores Filmes</string>
+    <string name="about">Sobre</string>
+    <string name="add_favorite">Adicionar como favorito</string>
+    <string name="average">Nota:</string>
+    <string name="back">Voltar</string>
+    <string name="by_author">Por: %1$s</string>
+    <string name="favorites">Favoritos</string>
+    <string name="no_favorites">Não há favoritos!</string>
+    <string name="grid_view_error">Não há filmes para serem mostrados. Por favor, escolha outra categoria dentro das opções.</string>
+    <string name="grid_view_error_needs_api_key">Não há filmes para serem mostrados. Por favor, atualize o PopMovies.</string>
+    <string name="grid_view_error_no_connection">Você está offline! Porém, sua coleção de filmes favoritos está disponível.</string>
+    <string name="popular">Filmes Populares</string>
+    <string name="progress_message">Por favor, aguarde&#8230;</string>
+    <string name="query_mode_label">Categoria</string>
+    <string name="release_date">Estréia:</string>
+    <string name="remove_favorite">Remover dos favoritos</string>
+    <string name="settings">Configurações</string>
+    <string name="reviews">Avaliações</string>
+    <string name="share">Compartilhar</string>
+    <string name="share_text">Assista a uma trailer de %1$s: </string>
+    <string name="trailer">Trailer</string>
+    <string name="trailers">Trailers</string>
+    <string name="formatted_date">dd/MM/yyyy</string>
+
+    <string-array name="query_mode_options">
+        <item>Filmes Populares</item>
+        <item>Melhores Filmes</item>
+        <item>Favoritos</item>
+        <!--<item>Upcoming</item>!-->
+    </string-array>
+    <string name="remove_from_favorites">O filme foi removido de seus favoritos</string>
+    <string name="save_movie_error">Não foi possível adicionar este filme como favorito</string>
+    <string name="delete_movie_error">Não foi possível remover este filme de seus favoritos.</string>
+    <string name="added_as_favorite">O filme foi adicionado aos seus favoritos.</string>
+</resources>

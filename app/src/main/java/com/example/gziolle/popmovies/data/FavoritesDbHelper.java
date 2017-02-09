@@ -11,12 +11,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class FavoritesDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
 
     private static final String CREATE_FAVORITES_TABLE = "CREATE TABLE " + FavoritesContract.FavoritesEntry.TABLE_NAME + " (" +
             FavoritesContract.FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID + " TEXT NOT NULL," +
+            FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE + " TEXT NOT NULL," +
             FavoritesContract.FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL," +
             FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL," +
             FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW + " TEXT NOT NULL," +

@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by gziolle on 12/15/2016.
@@ -31,7 +32,6 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<Trailer
     private static final String KEY = "key";
     private static final String NAME = "name";
     private final String LOG_TAG = FetchTrailersTask.class.getSimpleName();
-    private ProgressDialog mProgressDialog;
 
     private Context mContext = null;
     private AsyncResponse response = null;
@@ -71,9 +71,11 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<Trailer
             builder.authority(Utility.TMDB_AUTHORITY);
             builder.appendPath(Utility.TMDB_API_VERSION).appendPath(Utility.TMDB_MOVIE_DIR).appendPath(params[0]).appendPath(Utility.TMDB_MOVIE_VIDEOS);
             builder.appendQueryParameter(Utility.TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
-            builder.appendQueryParameter(Utility.TMDB_LANGUAGE, "en-us");
+            builder.appendQueryParameter(Utility.TMDB_LANGUAGE, Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry());
 
             URL queryUrl = new URL(builder.build().toString());
+
+            Log.d("Ziolle", "review url = " + builder.build().toString());
 
             conn = (HttpURLConnection) queryUrl.openConnection();
             conn.setRequestMethod("GET");

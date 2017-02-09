@@ -8,15 +8,17 @@ public class MovieItem {
 
     private long _id;
     private String title;
+    private String originalTitle;
     private String posterPath;
     private String overview;
     private double average;
     private String releaseDate;
 
 
-    public MovieItem(long _id, String original_title, String posterPath, String overview, double vote_average, String releaseDate) {
+    public MovieItem(long _id, String title, String originalTitle, String posterPath, String overview, double vote_average, String releaseDate) {
         this._id = _id;
-        this.title = original_title;
+        this.title = title;
+        this.originalTitle = originalTitle;
         this.posterPath = posterPath;
         this.overview = overview;
         this.average = vote_average;
@@ -45,5 +47,13 @@ public class MovieItem {
 
     public String getReleaseDate() {
         return releaseDate;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
     }
 }

@@ -198,8 +198,12 @@ public class DetailFragment extends Fragment implements TrailerAdapter.RecyclerV
             }
         }*/
 
+        TextView originalTitle = (TextView) getActivity().findViewById(R.id.original_title);
+        originalTitle.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE));
+
         TextView releaseDate = (TextView) getActivity().findViewById(R.id.release_date);
-        releaseDate.setText(bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+        String formattedDate = Utility.formatDate(getActivity(), bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE));
+        releaseDate.setText(formattedDate);
 
         TextView voteAverage = (TextView) getActivity().findViewById(R.id.average);
         String average = String.format(getActivity().getResources().getString(R.string.average_note), bundle.getDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE));

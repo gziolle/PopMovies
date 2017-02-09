@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * Created by gziolle on 12/15/2016.
@@ -105,6 +107,7 @@ public class Utility {
         ContentValues values = new ContentValues();
         values.put(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, String.valueOf(bundle.getLong(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID)));
         values.put(FavoritesContract.FavoritesEntry.COLUMN_TITLE, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_TITLE));
+        values.put(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_ORIGINAL_MOVIE_TITLE));
         values.put(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_POSTER_PATH));
         values.put(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, bundle.getString(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW));
         values.put(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE, String.valueOf(bundle.getDouble(FavoritesContract.FavoritesEntry.COLUMN_AVERAGE)));
@@ -138,5 +141,22 @@ public class Utility {
 
         editor.putInt(context.getString(R.string.pref_status), status);
         editor.commit();
+    }
+
+    public static String formatDate(Context context, String date) {
+
+        String[] values = date.split("-");
+        int[] intValues = new int[3];
+
+        for (int i = 0; i < intValues.length; i++) {
+            intValues[i] = Integer.valueOf(values[i]);
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(intValues[0], intValues[1], intValues[2]);
+
+        SimpleDateFormat formatter = new SimpleDateFormat(context.getString(R.string.formatted_date));
+        return formatter.format(calendar.getTime());
+
     }
 }

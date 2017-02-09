@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by gziolle on 12/15/2016.
@@ -52,7 +53,7 @@ public class FetchReviewsTask extends AsyncTask<String, Void, ArrayList<ReviewIt
             builder.authority(Utility.TMDB_AUTHORITY);
             builder.appendPath(Utility.TMDB_API_VERSION).appendPath(Utility.TMDB_MOVIE_DIR).appendPath(params[0]).appendPath(Utility.TMDB_MOVIE_REVIEWS);
             builder.appendQueryParameter(Utility.TMDB_API_KEY, BuildConfig.THE_MOVIE_DB_KEY);
-            builder.appendQueryParameter(Utility.TMDB_LANGUAGE, "en-us");
+            builder.appendQueryParameter(Utility.TMDB_LANGUAGE, Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry());
             builder.appendQueryParameter(Utility.TMDB_PAGE, "1");
 
             URL queryUrl = new URL(builder.build().toString());
