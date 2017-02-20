@@ -85,42 +85,22 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
             editor.commit();
             titleString = getString(R.string.favorites);
         } else {
-            if (queryMode.equals(getString(R.string.query_mode_popular))) {
-                mDrawer.setCheckedItem(R.id.popular);
-                titleString = getString(R.string.popular);
-            } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
-                titleString = getString(R.string.top_rated);
-                mDrawer.setCheckedItem(R.id.top_rated);
-            } else {
-                titleString = getString(R.string.favorites);
-                mDrawer.setCheckedItem(R.id.favorites);
-            }
+            titleString = setDrawerCheckedItem(queryMode);
         }
-
         getSupportActionBar().setTitle(titleString);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String queryMode = prefs.getString(getString(R.string.query_mode_key), "");
-
-        if (queryMode.equals(getString(R.string.query_mode_popular))) {
-            mDrawer.setCheckedItem(R.id.popular);
-        } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
-            mDrawer.setCheckedItem(R.id.top_rated);
-        } else {
-            mDrawer.setCheckedItem(R.id.favorites);
-        }
+        setDrawerCheckedItem(queryMode);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return super.onCreateOptionsMenu(menu);
-
     }
 
     @Override
@@ -203,6 +183,10 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
                 queryMode = getString(R.string.query_mode_top_rated);
                 titleString = getString(R.string.top_rated);
                 break;
+            case R.id.upcoming:
+                queryMode = getString(R.string.query_mode_upcoming);
+                titleString = getString(R.string.upcoming);
+                break;
             case R.id.settings:
                 item.setChecked(false);
                 mDrawerLayout.closeDrawers();
@@ -231,13 +215,22 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         movieListFragment.queryMovies();
     }
 
-    private void setDrawerCheckedItem(String queryMode) {
+    private String setDrawerCheckedItem(String queryMode) {
+        String titleString;
         if (queryMode.equals(getString(R.string.query_mode_popular))) {
             mDrawer.setCheckedItem(R.id.popular);
+            titleString = getString(R.string.popular);
         } else if (queryMode.equals(getString(R.string.query_mode_top_rated))) {
             mDrawer.setCheckedItem(R.id.top_rated);
+            titleString = getString(R.string.top_rated);
+        } else if (queryMode.equals(getString(R.string.query_mode_upcoming))) {
+            mDrawer.setCheckedItem(R.id.upcoming);
+            titleString = getString(R.string.upcoming);
         } else {
             mDrawer.setCheckedItem(R.id.favorites);
+            titleString = getString(R.string.favorites);
         }
+
+        return titleString;
     }
 }

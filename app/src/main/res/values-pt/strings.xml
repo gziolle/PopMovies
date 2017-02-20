@@ -24,13 +24,15 @@
     <string name="trailer">Trailer</string>
     <string name="trailers">Trailers</string>
     <string name="formatted_date">dd/MM/yyyy</string>
+    <string name="upcoming">Próximas estréias</string>
 
     <string-array name="query_mode_options">
         <item>Filmes Populares</item>
         <item>Melhores Filmes</item>
         <item>Favoritos</item>
-        <!--<item>Upcoming</item>!-->
+        <item>Próximas estréias</item>
     </string-array>
+
     <string name="remove_from_favorites">O filme foi removido de seus favoritos</string>
     <string name="save_movie_error">Não foi possível adicionar este filme como favorito</string>
     <string name="delete_movie_error">Não foi possível remover este filme de seus favoritos.</string>

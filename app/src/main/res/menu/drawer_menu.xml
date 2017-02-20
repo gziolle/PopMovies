@@ -16,6 +16,10 @@
             android:id="@+id/favorites"
             android:icon="@drawable/ic_favorite"
             android:title="@string/favorites" />
+        <item
+            android:id="@+id/upcoming"
+            android:icon="@drawable/ic_fiber_new"
+            android:title="@string/upcoming" />
     </group>
 
     <group

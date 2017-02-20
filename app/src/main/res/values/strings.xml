@@ -21,12 +21,14 @@
     <string name="popular">Popular</string>
     <string name="top_rated">Top Rated</string>
     <string name="favorites">Favorites</string>
+    <string name="upcoming">Upcoming</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
 
     <string name="query_mode_popular" translatable="false">popular</string>
     <string name="query_mode_top_rated" translatable="false">top_rated</string>
     <string name="query_mode_favorites" translatable="false">favorites</string>
+    <string name="query_mode_upcoming" translatable="false">upcoming</string>
 
     <string name="release_date">Release Date: </string>
     <string name="average">Average: </string>
@@ -57,6 +59,7 @@
         <item>Popular</item>
         <item>Highest Rated</item>
         <item>Favorites</item>
+        <item>Upcoming</item>
         <!--<item>Upcoming</item>!-->
     </string-array>
 
@@ -64,6 +67,6 @@
         <item>popular</item>
         <item>top_rated</item>
         <item>favorites</item>
-        <!--<item>upcoming</item>!-->
+        <item>upcoming</item>
     </string-array>
 </resources>
